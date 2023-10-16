@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "Edge_TheGame/Weapon/Weapon.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -27,6 +29,13 @@ AEdgeCharacter::AEdgeCharacter()
 	OverHeadWidget->SetupAttachment(RootComponent);
 }
 
+void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(AEdgeCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
 void AEdgeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -37,6 +46,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -50,6 +60,8 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Turn", this, &ThisClass::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ThisClass::LookUp);
 }
+
+
 
 void AEdgeCharacter::MoveFoward(float Value)
 {
@@ -80,6 +92,36 @@ void AEdgeCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
+
+void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+
 
 
 

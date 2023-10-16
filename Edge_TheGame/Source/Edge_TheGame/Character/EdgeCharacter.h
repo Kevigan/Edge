@@ -15,6 +15,7 @@ public:
 	AEdgeCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -26,14 +27,20 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class USpringArmComponent* CameraBoom;
+		class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UWidgetComponent* OverHeadWidget;
+		class UWidgetComponent* OverHeadWidget;
 
-public:	
-	
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+		class AWeapon* OverlappingWeapon;
+
+	UFUNCTION()
+		void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
+public:
+	 void SetOverlappingWeapon(AWeapon* Weapon);
 };
