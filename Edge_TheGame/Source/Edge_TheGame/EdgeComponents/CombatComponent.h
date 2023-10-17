@@ -15,8 +15,9 @@ class EDGE_THEGAME_API UCombatComponent : public UActorComponent
 
 public:	
 	UCombatComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	friend class AEdgeCharacter;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -25,6 +26,8 @@ protected:
 
 private:
 	class AEdgeCharacter* Character;
+
+	UPROPERTY(Replicated)
 	AWeapon* EquippedWeapon;
 
 public:	

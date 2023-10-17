@@ -27,7 +27,7 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Speed = Velocity.Size();
 
 	bIsInAir = EdgeCharacter->GetCharacterMovement()->IsFalling();
-
 	bIsAccelerating = EdgeCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false; 
-
+	bWeaponEquipped = EdgeCharacter->IsWeaponEquipped();
+	bIsCrouched = EdgeCharacter->bIsCrouched;
 }

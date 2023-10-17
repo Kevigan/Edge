@@ -52,7 +52,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
+
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -61,11 +61,14 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ThisClass::EquipButtonPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::CrouchButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ThisClass::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ThisClass::LookUp);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void AEdgeCharacter::PostInitializeComponents()
@@ -74,14 +77,6 @@ void AEdgeCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
-	}
-}
-
-void AEdgeCharacter::EquipButtonPressed()
-{
-	if (Combat && HasAuthority())
-	{
-		Combat->EquipWeapon(OverlappingWeapon);
 	}
 }
 
@@ -115,6 +110,42 @@ void AEdgeCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
+void AEdgeCharacter::EquipButtonPressed()
+{
+	if (Combat)
+	{
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+
+void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
+void AEdgeCharacter::CrouchButtonPressed()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
+	}
+}
+
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
@@ -124,6 +155,7 @@ void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	OverlappingWeapon = Weapon;
 	if (IsLocallyControlled())
 	{
+
 		if (OverlappingWeapon)
 		{
 			OverlappingWeapon->ShowPickupWidget(true);
@@ -136,6 +168,7 @@ void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->ShowPickupWidget(true);
+
 	}
 	if (LastWeapon)
 	{
@@ -143,6 +176,10 @@ void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+bool AEdgeCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
 
 
 
