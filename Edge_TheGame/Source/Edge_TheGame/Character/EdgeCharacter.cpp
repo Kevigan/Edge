@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Edge_TheGame/Weapon/Weapon.h"
 #include "Edge_TheGame/EdgeComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -31,6 +32,9 @@ AEdgeCharacter::AEdgeCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
 }
 
 void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

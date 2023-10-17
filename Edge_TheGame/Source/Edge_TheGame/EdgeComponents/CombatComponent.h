@@ -8,12 +8,12 @@
 
 class AWeapon;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class EDGE_THEGAME_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UCombatComponent();
 	friend class AEdgeCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -26,21 +26,26 @@ protected:
 	void SetAiming(bool bIsAiming);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetAiming(bool bIsAiming);
+		void ServerSetAiming(bool bIsAiming);
 
 	UFUNCTION()
-	void OnRep_EquippedWeapon();
+		void OnRep_EquippedWeapon();
 
 private:
 	class AEdgeCharacter* Character;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-	AWeapon* EquippedWeapon;
+		AWeapon* EquippedWeapon;
 
 	UPROPERTY(Replicated)
-	bool bAiming;
+		bool bAiming;
 
-public:	
+	UPROPERTY(EditAnywhere)
+		float BaseWalkSpeed;
+	UPROPERTY(EditAnywhere)
+		float AimWalkSpeed;
 
-	
+public:
+
+
 };
