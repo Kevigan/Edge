@@ -5,6 +5,7 @@
 #include "EdgeCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Edge_TheGame/Weapon/Weapon.h"
 
 void UEdgeAnimInstance::NativeInitializeAnimation()
 {
@@ -30,8 +31,10 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsInAir = EdgeCharacter->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = EdgeCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 	bWeaponEquipped = EdgeCharacter->IsWeaponEquipped();
+	EquippedWeapon = EdgeCharacter->GetEquippedWeapon();
 	bIsCrouched = EdgeCharacter->bIsCrouched;
 	bAiming = EdgeCharacter->IsAiming();
+	TurningInPlace = EdgeCharacter->GetTurningInPlace();
 
 	// Offset Yaw for Strafing
 	FRotator AimRotation = EdgeCharacter->GetBaseAimRotation();
@@ -49,4 +52,14 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	AO_Yaw = EdgeCharacter->GetAO_Yaw();
 	AO_Pitch = EdgeCharacter->GetAO_Pitch();
+
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && EdgeCharacter->GetMesh())
+	{
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		FVector OutPosition;
+		FRotator OutRotation;
+		EdgeCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }
