@@ -10,6 +10,7 @@
 #include "Edge_TheGame/Weapon/Weapon.h"
 #include "Edge_TheGame/EdgeComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -56,7 +57,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
+	AimOffset(DeltaTime);
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -166,6 +167,31 @@ void AEdgeCharacter::AimButtonReleased()
 	{
 		Combat->SetAiming(false);
 	}
+}
+
+void AEdgeCharacter::AimOffset(float DeltaTime)
+{
+	if(Combat && Combat->EquippedWeapon == nullptr) return;
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+	if (Speed == 0.f && !bIsInAir)
+	{
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir)
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch + 60.f;
 }
 
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
