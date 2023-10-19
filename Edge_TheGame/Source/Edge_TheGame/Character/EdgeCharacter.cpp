@@ -35,8 +35,11 @@ AEdgeCharacter::AEdgeCharacter()
 	Combat->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 720.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
 }
 
 void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -183,7 +186,11 @@ void AEdgeCharacter::AimOffset(float DeltaTime)
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
+		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
 	if (Speed > 0.f || bIsInAir)
@@ -204,6 +211,18 @@ void AEdgeCharacter::AimOffset(float DeltaTime)
 	}
 }
 
+void AEdgeCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+}
+
 void AEdgeCharacter::TurnInPlace(float DeltaTime)
 {
 	if (AO_Yaw > 90.f)
@@ -214,6 +233,17 @@ void AEdgeCharacter::TurnInPlace(float DeltaTime)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
+
 }
 
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
