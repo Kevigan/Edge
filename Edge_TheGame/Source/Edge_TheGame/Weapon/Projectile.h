@@ -10,8 +10,8 @@ UCLASS()
 class EDGE_THEGAME_API AProjectile : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
 
@@ -20,8 +20,16 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* CollisionBox;
+		class UBoxComponent* CollisionBox;
 
-public:	
+	UPROPERTY(VisibleAnywhere)
+		class UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(EditAnywhere)
+		class UParticleSystem* Tracer;
+
+		class UParticleSystemComponent* TracerComponent;
+
+public:
 
 };
