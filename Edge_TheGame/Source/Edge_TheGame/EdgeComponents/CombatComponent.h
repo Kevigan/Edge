@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+#define TRACE_LENGTH 80000.f
+
 class AWeapon;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -31,6 +33,16 @@ protected:
 	UFUNCTION()
 		void OnRep_EquippedWeapon();
 
+	void FireButtonPressed(bool bPressed);
+
+	UFUNCTION(Server, Reliable)
+		void ServerFire();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastFire();
+
+		void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
 private:
 	class AEdgeCharacter* Character;
 
@@ -44,6 +56,8 @@ private:
 		float BaseWalkSpeed;
 	UPROPERTY(EditAnywhere)
 		float AimWalkSpeed;
+
+	bool bFireButtonPressed;
 
 public:
 
