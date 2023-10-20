@@ -41,10 +41,14 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
-		void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
+	void SetHUDCrosshairs(float DeltaTime);
 
 private:
 	class AEdgeCharacter* Character;
+	class AEdgePlayerController* Controller;
+	class AEdge_HUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		AWeapon* EquippedWeapon;
@@ -59,6 +63,30 @@ private:
 
 	bool bFireButtonPressed;
 
+	/// <summary>
+	/// HUD and Crosshairs
+	/// </summary>
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
+
+	FVector HitTarget;
+
+	/// <summary>
+	/// Aiming and FOV
+	/// </summary>
+
+		//FOV when not aiming set to the cameras base FOV in BeginPlay
+		float DefaultFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		float ZoomedFOV = 30.f;
+
+		float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		float ZoomInterpSpeed = 20.f;
+
+		void InterpFOV(float DeltaTime);
 public:
 
 

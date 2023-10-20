@@ -325,6 +325,12 @@ AWeapon* AEdgeCharacter::GetEquippedWeapon()
 	return Combat->EquippedWeapon;
 }
 
+FVector AEdgeCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr) return FVector();
+	return Combat->HitTarget;
+}
+
 
 
 
