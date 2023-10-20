@@ -12,6 +12,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Edge_TheGame/Character/EdgeAnimInstance.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
+#include "Edge_TheGame/HUD/Edge_HUD.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -36,6 +38,7 @@ AEdgeCharacter::AEdgeCharacter()
 	Combat->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 720.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
@@ -63,6 +66,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
+	HideCameraIfCharacterClose();
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -105,6 +109,26 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void AEdgeCharacter::PlayHitUI()
+{
+	if (IsLocallyControlled())
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("looool"));
+		}
+		Destroy();
+	}
+	else if(HasAuthority())
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("looool"));
+		}
+		Destroy();
 	}
 }
 
@@ -277,6 +301,27 @@ void AEdgeCharacter::TurnInPlace(float DeltaTime)
 		}
 	}
 
+}
+
+void AEdgeCharacter::HideCameraIfCharacterClose()
+{
+	if (!IsLocallyControlled()) return;
+	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+		{
+			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+	}
 }
 
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)

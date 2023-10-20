@@ -56,6 +56,8 @@ public:
 	UPROPERTY(EditAnywhere)
 		float ZoomInterpSpeed = 20.f;
 
+	UPROPERTY(EditAnywhere)
+		float CrosshairShootingFactor = 0.75f;
 protected:
 	virtual void BeginPlay() override;
 
@@ -106,6 +108,6 @@ public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
-	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
-	FORCEINLINE float GetZoomInterpSpeed() const {return ZoomInterpSpeed;}
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 };
