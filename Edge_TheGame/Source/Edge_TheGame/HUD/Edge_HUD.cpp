@@ -1,3 +1,4 @@
+#include "Edge_HUD.h"
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -64,3 +65,4 @@ void AEdge_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D VierwportCenter, FV
 		CrosshairsColor
 	);
 }
+

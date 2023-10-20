@@ -23,7 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
-
+	FLinearColor ColorToChange;
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -92,6 +92,6 @@ private:
 
 		void InterpFOV(float DeltaTime);
 public:
-
+	void SetCrossHairCOlor(FLinearColor color){ ColorToChange = color;}
 
 };

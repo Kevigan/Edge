@@ -14,6 +14,8 @@
 #include "Edge_TheGame/Character/EdgeAnimInstance.h"
 #include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 #include "Edge_TheGame/HUD/Edge_HUD.h"
+#include "Kismet/GameplayStatics.h"
+#include "Edge_TheGame/Edge_TheGame.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -37,6 +39,7 @@ AEdgeCharacter::AEdgeCharacter()
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 720.f);
@@ -44,6 +47,7 @@ AEdgeCharacter::AEdgeCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
+
 }
 
 void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -53,12 +57,9 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME_CONDITION(AEdgeCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
-
-
 void AEdgeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void AEdgeCharacter::Tick(float DeltaTime)
@@ -112,24 +113,19 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
-void AEdgeCharacter::PlayHitUI()
+void AEdgeCharacter::MulticastPlayHitUI_Implementation()
 {
-	if (IsLocallyControlled())
+	if (!IsLocallyControlled()) return;
+	if (Combat)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("looool"));
-		}
-		Destroy();
+		Combat->SetCrossHairCOlor(FLinearColor::Blue);
 	}
-	else if(HasAuthority())
+	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
+	if (HUD)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("looool"));
-		}
-		Destroy();
+		HUD->ReceiveOnShowHitUI();
 	}
+	CrouchButtonPressed();
 }
 
 void AEdgeCharacter::MoveFoward(float Value)
@@ -176,7 +172,6 @@ void AEdgeCharacter::EquipButtonPressed()
 		}
 	}
 }
-
 
 void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 {

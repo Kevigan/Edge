@@ -31,6 +31,9 @@ class EDGE_THEGAME_API AEdge_HUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
+		void ReceiveOnShowHitUI();
+
 private:
 	FHUDPackage HUDPackage;
 

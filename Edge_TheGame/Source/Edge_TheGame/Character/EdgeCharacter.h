@@ -20,7 +20,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
-	void PlayHitUI();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastPlayHitUI();
 
 protected:
 	virtual void BeginPlay() override;
@@ -39,6 +41,8 @@ protected:
 	void FireButtonReleased();
 
 private:
+	class AEdge_HUD* HUD;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* CameraBoom;
 
