@@ -36,6 +36,8 @@ protected:
 
 	void FireButtonPressed(bool bPressed);
 
+	void Fire();
+
 	UFUNCTION(Server, Reliable)
 		void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
@@ -80,18 +82,29 @@ private:
 	/// </summary>
 
 		//FOV when not aiming set to the cameras base FOV in BeginPlay
-		float DefaultFOV;
+	float DefaultFOV;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 		float ZoomedFOV = 30.f;
 
-		float CurrentFOV;
+	float CurrentFOV;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 		float ZoomInterpSpeed = 20.f;
 
-		void InterpFOV(float DeltaTime);
+	void InterpFOV(float DeltaTime);
+
+	/// <summary>
+	///  Automatic fire
+	/// </summary>
+
+	FTimerHandle FireTimer;
+
+		bool bCanFire = true;
+
+		void StartFireTimer();
+		void FireTimerFinished();
 public:
-	void SetCrossHairCOlor(FLinearColor color){ ColorToChange = color;}
+	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
 
 };

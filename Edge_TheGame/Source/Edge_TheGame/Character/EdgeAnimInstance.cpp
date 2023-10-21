@@ -35,6 +35,7 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = EdgeCharacter->bIsCrouched;
 	bAiming = EdgeCharacter->IsAiming();
 	TurningInPlace = EdgeCharacter->GetTurningInPlace();
+	bRotateRootBone = EdgeCharacter->ShouldRotateRootBone();
 
 	// Offset Yaw for Strafing
 	FRotator AimRotation = EdgeCharacter->GetBaseAimRotation();

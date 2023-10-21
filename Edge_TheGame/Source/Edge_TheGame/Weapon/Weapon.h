@@ -32,32 +32,42 @@ public:
 	/// Textures for the weapon crosshairs
 	/// </summary>
 
-	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UTexture2D* CrosshairsCenter;
 
-	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UTexture2D* CrosshairsLeft;
 
-	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UTexture2D* CrosshairsRight;
 
-	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UTexture2D* CrosshairsTop;
 
-	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UTexture2D* CrosshairsBottom;
 
 	/// <summary>
 	/// Zoomed FOV while aiming
 	/// </summary>
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
 		float ZoomedFOV = 30.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
 		float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
 		float CrosshairShootingFactor = 0.75f;
+
+	/// <summary>
+	/// Auto fire
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
+		float FireDelay = .5f;
+
+	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
+		bool bAutomatic = false;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -95,10 +105,10 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class UWidgetComponent* PickupWidget;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = Config)
 		class UAnimationAsset* FireAnimation;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<class ACasing> CasingClass;
 
 
