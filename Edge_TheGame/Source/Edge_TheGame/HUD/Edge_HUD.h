@@ -31,8 +31,17 @@ class EDGE_THEGAME_API AEdge_HUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UCharacterOverlay> CharacterOverlayClass;
+
+	class UCharacterOverlay* CharacterOverlay;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
+
+protected:
+	virtual void BeginPlay() override;
+	void AddCharacterOverlay();
 
 private:
 	FHUDPackage HUDPackage;

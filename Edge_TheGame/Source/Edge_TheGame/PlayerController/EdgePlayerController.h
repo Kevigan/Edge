@@ -14,4 +14,13 @@ class EDGE_THEGAME_API AEdgePlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	void SetHUDHealth(float Health, float MaxHealth);
+
+protected:
+	virtual void BeginPlay() override;
+	
+private:
+	class AEdge_HUD* EdgeHUD;
+
 };

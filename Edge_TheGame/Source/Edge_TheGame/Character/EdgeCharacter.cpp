@@ -16,6 +16,7 @@
 #include "Edge_TheGame/HUD/Edge_HUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Edge_TheGame/Edge_TheGame.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -55,11 +56,18 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AEdgeCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(AEdgeCharacter, Health);
 }
 
 void AEdgeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UpdateHUDHealth();
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
+	}
 }
 
 void AEdgeCharacter::Tick(float DeltaTime)
@@ -119,6 +127,13 @@ void AEdgeCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0.f;
 }
 
+void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitUI();
+}
+
 void AEdgeCharacter::PlayFireMontage(bool bAiming)
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
@@ -133,7 +148,7 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
-void AEdgeCharacter::MulticastPlayHitUI_Implementation()
+void AEdgeCharacter::PlayHitUI()
 {
 	if (!IsLocallyControlled()) return;
 	if (Combat)
@@ -146,6 +161,21 @@ void AEdgeCharacter::MulticastPlayHitUI_Implementation()
 		HUD->ReceiveOnShowHitUI();
 	}
 }
+
+
+//void AEdgeCharacter::MulticastPlayHitUI_Implementation()
+//{
+//	if (!IsLocallyControlled()) return;
+//	if (Combat)
+//	{
+//		Combat->SetCrossHairCOlor(FLinearColor::Blue);
+//	}
+//	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
+//	if (HUD)
+//	{
+//		HUD->ReceiveOnShowHitUI();
+//	}
+//}
 
 void AEdgeCharacter::MoveFoward(float Value)
 {
@@ -233,7 +263,7 @@ float AEdgeCharacter::CalculateSpeed()
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	return Velocity.Size();
-	
+
 }
 
 void AEdgeCharacter::AimOffset(float DeltaTime)
@@ -385,6 +415,21 @@ void AEdgeCharacter::HideCameraIfCharacterClose()
 		{
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
+	}
+}
+
+void AEdgeCharacter::OnRep_Health()
+{
+	UpdateHUDHealth();
+	PlayHitUI();
+}
+
+void AEdgeCharacter::UpdateHUDHealth()
+{
+	EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDHealth(Health, MaxHealth);
 	}
 }
 

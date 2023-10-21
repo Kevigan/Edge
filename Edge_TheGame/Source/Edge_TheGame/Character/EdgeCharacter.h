@@ -21,10 +21,10 @@ public:
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
 
-	UFUNCTION(NetMulticast, Reliable)
-		void MulticastPlayHitUI();
+	/*UFUNCTION(NetMulticast, Reliable)
+		void MulticastPlayHitUI();*/
 
-		virtual void OnRep_ReplicatedMovement() override;
+	virtual void OnRep_ReplicatedMovement() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,6 +43,10 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
+	void UpdateHUDHealth();
+	void PlayHitUI();
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 private:
 	class AEdge_HUD* HUD;
@@ -91,6 +95,20 @@ private:
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
 	float CalculateSpeed();
+
+	/// <summary>
+	///  Player health
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		float MaxHealth = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Config = PlayerStats)
+		float Health = 100.f;
+
+	UFUNCTION()
+		void OnRep_Health();
+
+	class AEdgePlayerController* EdgePlayerController;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
