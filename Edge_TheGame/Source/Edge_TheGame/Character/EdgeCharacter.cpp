@@ -17,6 +17,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Edge_TheGame/Edge_TheGame.h"
 #include "Edge_TheGame/PlayerController/EdgePlayerController.h"
+#include "Edge_TheGame/GameMode/EdgeGameMode.h"
+#include "TimerManager.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -132,6 +134,17 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitUI();
+
+	if (Health == 0.f)
+	{
+		AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
+		if (EdgeGameMode)
+		{
+			EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
+			AEdgePlayerController* AttackerController = Cast<AEdgePlayerController>(InstigatorController);
+			EdgeGameMode->PlayerEliminated(this, EdgePlayerController, AttackerController);
+		}
+	}
 }
 
 void AEdgeCharacter::PlayFireMontage(bool bAiming)
@@ -145,6 +158,41 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void AEdgeCharacter::Elim()
+{
+	MulticastElim();
+	GetWorldTimerManager().SetTimer(
+		ElimTimer, 
+		this,
+		&ThisClass::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void AEdgeCharacter::MulticastElim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
+}
+
+void AEdgeCharacter::ElimTimerFinished()
+{
+	AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
+	if (EdgeGameMode)
+	{
+		EdgeGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void AEdgeCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
 	}
 }
 
