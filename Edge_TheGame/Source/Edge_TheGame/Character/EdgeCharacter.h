@@ -22,6 +22,7 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 	virtual void Destroyed() override;
 	void PlayFireMontage(bool bAiming);
+	void PlayReloadMontage();
 	void PlayElimMontage();
 
 	void Elim();
@@ -40,6 +41,7 @@ protected:
 	void LookUp(float Value);
 	void EquipButtonPressed();
 	void CrouchButtonPressed();
+	void ReloadButtonPressed();
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
@@ -85,10 +87,17 @@ private:
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
 
-	UPROPERTY(EditAnywhere, Category = Combat)
+	/// <summary>
+	/// Montages
+	/// </summary>
+
+	UPROPERTY(EditAnywhere, Category = Config = Combat)
 		class UAnimMontage* FireWeaponMontage;
 
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = Config = Combat)
+		class UAnimMontage* ReloadMontage;
+
+	UPROPERTY(EditAnywhere, Category = Config = Combat)
 		class UAnimMontage* ElimMontage;
 
 	void HideCameraIfCharacterClose();

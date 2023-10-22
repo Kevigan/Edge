@@ -20,6 +20,7 @@
 #include "Edge_TheGame/GameMode/EdgeGameMode.h"
 #include "TimerManager.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
+#include "Edge_TheGame/Weapon/WeaponTypes.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -101,6 +102,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ThisClass::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::CrouchButtonPressed);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ThisClass::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ThisClass::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ThisClass::AimButtonReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ThisClass::FireButtonPressed);
@@ -158,6 +160,26 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 		AnimInstance->Montage_Play(FireWeaponMontage);
 		FName SectionName;
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void AEdgeCharacter::PlayReloadMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		FName SectionName;
+
+		switch (Combat->EquippedWeapon->GetWeaponType())
+		{
+			case EWeaponType::EWT_AssaulRifle:
+				SectionName = FName("Rifle");
+				break;
+		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
@@ -292,6 +314,14 @@ void AEdgeCharacter::CrouchButtonPressed()
 	else
 	{
 		Crouch();
+	}
+}
+
+void AEdgeCharacter::ReloadButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->Reload();
 	}
 }
 

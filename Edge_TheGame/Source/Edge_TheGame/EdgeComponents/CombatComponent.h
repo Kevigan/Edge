@@ -24,6 +24,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
+	void Reload();
 	FLinearColor ColorToChange;
 protected:
 	virtual void BeginPlay() override;
@@ -48,6 +49,9 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+		void ServerReload();
 
 private:
 	UPROPERTY()
@@ -118,7 +122,12 @@ private:
 	UFUNCTION()
 		void OnRep_CarriedAmmo();
 
-		TMap<EWeaponType, int32> CarriedAmmoMap;
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere, Category = Config = Ammo)
+		int32 StartingARAmmo = 30;
+
+	void InitializeCarriedAmmo();
 
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
