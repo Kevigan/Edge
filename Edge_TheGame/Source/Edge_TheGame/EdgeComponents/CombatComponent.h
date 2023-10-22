@@ -49,9 +49,12 @@ protected:
 	void SetHUDCrosshairs(float DeltaTime);
 
 private:
-	class AEdgeCharacter* Character;
-	class AEdgePlayerController* Controller;
-	class AEdge_HUD* HUD;
+	UPROPERTY()
+		class AEdgeCharacter* Character;
+	UPROPERTY()
+		class AEdgePlayerController* Controller;
+	UPROPERTY()
+		class AEdge_HUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		AWeapon* EquippedWeapon;
@@ -100,10 +103,10 @@ private:
 
 	FTimerHandle FireTimer;
 
-		bool bCanFire = true;
+	bool bCanFire = true;
 
-		void StartFireTimer();
-		void FireTimerFinished();
+	void StartFireTimer();
+	void FireTimerFinished();
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
 

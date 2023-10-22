@@ -20,4 +20,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* HealthText;
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* KillAmount;
+
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* DeathAmount;
 };

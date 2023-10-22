@@ -7,20 +7,24 @@
 #include "EdgePlayerController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class EDGE_THEGAME_API AEdgePlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDKills(float Score);
+	void SetHUDDeath(int32 Value);
+	void OnPossess(APawn* InPawn) override;
 
 protected:
 	virtual void BeginPlay() override;
-	
+
 private:
-	class AEdge_HUD* EdgeHUD;
+	UPROPERTY()
+		class AEdge_HUD* EdgeHUD;
 
 };

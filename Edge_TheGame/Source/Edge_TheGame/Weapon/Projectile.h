@@ -31,7 +31,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent;
 
-	class UParticleSystemComponent* TracerComponent;
+	UPROPERTY()
+		class UParticleSystemComponent* TracerComponent;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		class UParticleSystem* Tracer;

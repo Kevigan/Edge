@@ -19,14 +19,17 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	virtual void OnRep_ReplicatedMovement() override;
+	virtual void Destroyed() override;
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
-	virtual void OnRep_ReplicatedMovement() override;
 
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastElim();
 
+	UPROPERTY()
+		class AEdgePlayerState* EdgePlayerState;
 
 protected:
 	virtual void BeginPlay() override;
@@ -113,7 +116,8 @@ private:
 	UFUNCTION()
 		void OnRep_Health();
 
-	class AEdgePlayerController* EdgePlayerController;
+	UPROPERTY()
+		class AEdgePlayerController* EdgePlayerController;
 
 	bool bElimmed = false;
 
@@ -121,6 +125,8 @@ private:
 	void ElimTimerFinished();
 	UPROPERTY(EditDefaultsOnly)
 		float ElimDelay = 3.f;
+	// Poll for any relevant classes and initialize our HUD
+	void PollInit();
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -134,4 +140,6 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 };

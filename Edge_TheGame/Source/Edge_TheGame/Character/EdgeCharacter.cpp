@@ -19,6 +19,7 @@
 #include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 #include "Edge_TheGame/GameMode/EdgeGameMode.h"
 #include "TimerManager.h"
+#include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -91,6 +92,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	}
 
 	HideCameraIfCharacterClose();
+	PollInit();
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -163,9 +165,13 @@ void AEdgeCharacter::PlayFireMontage(bool bAiming)
 
 void AEdgeCharacter::Elim()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(
-		ElimTimer, 
+		ElimTimer,
 		this,
 		&ThisClass::ElimTimerFinished,
 		ElimDelay
@@ -176,6 +182,17 @@ void AEdgeCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
+
+	//Disable character movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (EdgePlayerController)
+	{
+		DisableInput(EdgePlayerController);
+	}
+	//Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AEdgeCharacter::ElimTimerFinished()
@@ -201,29 +218,14 @@ void AEdgeCharacter::PlayHitUI()
 	if (!IsLocallyControlled()) return;
 	if (Combat)
 	{
-		Combat->SetCrossHairCOlor(FLinearColor::Blue);
+		//Combat->SetCrossHairCOlor(FLinearColor::Blue);
 	}
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (HUD)
 	{
-		HUD->ReceiveOnShowHitUI();
+		//HUD->ReceiveOnShowHitUI();
 	}
 }
-
-
-//void AEdgeCharacter::MulticastPlayHitUI_Implementation()
-//{
-//	if (!IsLocallyControlled()) return;
-//	if (Combat)
-//	{
-//		Combat->SetCrossHairCOlor(FLinearColor::Blue);
-//	}
-//	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
-//	if (HUD)
-//	{
-//		HUD->ReceiveOnShowHitUI();
-//	}
-//}
 
 void AEdgeCharacter::MoveFoward(float Value)
 {
@@ -373,8 +375,6 @@ void AEdgeCharacter::SimProxiesTurn()
 	ProxyRotation = GetActorRotation();
 	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationsLastFrame).Yaw;
 
-	UE_LOG(LogTemp, Warning, TEXT("ProxyYaw: %f"), ProxyYaw);
-
 	if (FMath::Abs(ProxyYaw) > TurnThreshold)
 	{
 		if (ProxyYaw > TurnThreshold)
@@ -481,6 +481,19 @@ void AEdgeCharacter::UpdateHUDHealth()
 	}
 }
 
+void AEdgeCharacter::PollInit()
+{
+	if (EdgePlayerState == nullptr)
+	{
+		EdgePlayerState = GetPlayerState<AEdgePlayerState>();
+		if (EdgePlayerState)
+		{
+			EdgePlayerState->AddToScore(0.f);
+			EdgePlayerState->AddToDeath(0);
+		}
+	}
+}
+
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
@@ -533,6 +546,10 @@ FVector AEdgeCharacter::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
+void AEdgeCharacter::Destroyed()
+{
+	Super::Destroyed();
+}
 
 
 
