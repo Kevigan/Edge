@@ -25,6 +25,8 @@ public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_Owner() override;
+	void SetHUDAmmo();
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
@@ -112,7 +114,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<class ACasing> CasingClass;
 
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo, Category = Config)
+		int32 Ammo;
 
+	UFUNCTION()
+		void OnRep_Ammo();
+
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		int32 MagCapacity;
+
+	UPROPERTY()
+		class AEdgeCharacter* EdgeOwnerCharacter;
+	UPROPERTY()
+		class AEdgePlayerController* EdgeOwnerController;
 
 public:
 
@@ -121,4 +137,5 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
+	bool IsEmpty();
 };

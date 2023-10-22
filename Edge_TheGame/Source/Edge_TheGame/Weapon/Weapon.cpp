@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 
 AWeapon::AWeapon()
 {
@@ -60,6 +61,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -78,6 +80,45 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (EdgeCharacter && PickupWidget)
 	{
 		EdgeCharacter->SetOverlappingWeapon(nullptr);
+	}
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	if (EdgeOwnerCharacter)
+	{
+		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
+		if (EdgeOwnerController)
+		{
+			EdgeOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	if (Owner == nullptr)
+	{
+		EdgeOwnerCharacter = nullptr;
+		EdgeOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
 	}
 }
 
@@ -170,6 +211,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+	SpendRound();
 }
 
 void AWeapon::Dropped()
@@ -178,5 +220,11 @@ void AWeapon::Dropped()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
+	EdgeOwnerCharacter = nullptr;
+	EdgeOwnerController = nullptr;
 }
 
+bool AWeapon::IsEmpty()
+{
+	return Ammo <= 0;
+}

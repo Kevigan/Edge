@@ -65,7 +65,6 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void AEdgeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 	UpdateHUDHealth();
 	if (HasAuthority())
 	{
@@ -180,6 +179,10 @@ void AEdgeCharacter::Elim()
 
 void AEdgeCharacter::MulticastElim_Implementation()
 {
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDWeaponAmmo(0);
+	}
 	bElimmed = true;
 	PlayElimMontage();
 

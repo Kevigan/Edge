@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Edge_TheGame/HUD/Edge_HUD.h"
+#include "Edge_TheGame/Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -107,6 +108,18 @@ private:
 
 	void StartFireTimer();
 	void FireTimerFinished();
+
+	bool CanFire();
+
+	//Carried Ammo for the currently equipped weapon
+	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
+		int32 CarriedAmmo;
+
+	UFUNCTION()
+		void OnRep_CarriedAmmo();
+
+		TMap<EWeaponType, int32> CarriedAmmoMap;
+
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
 
