@@ -15,6 +15,24 @@ void AEdgePlayerController::BeginPlay()
 	EdgeHUD = Cast<AEdge_HUD>(GetHUD());
 }
 
+void AEdgePlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	SetHUDTime();
+
+	CheckTimeSync(DeltaTime);
+}
+
+void AEdgePlayerController::CheckTimeSync(float DeltaTime)
+{
+	TimeSyncRunningTime += DeltaTime;
+	if (IsLocalController() && TimeSyncRunningTime > TimeSyncFrequency)
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+		TimeSyncRunningTime = 0.f;
+	}
+}
 
 void AEdgePlayerController::OnPossess(APawn* InPawn)
 {
@@ -83,5 +101,58 @@ void AEdgePlayerController::SetHUDCarriedWeaponAmmo(int32 Ammo)
 	{
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		EdgeHUD->CharacterOverlay->CarriedWeaponAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}
+
+void AEdgePlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HealthBar && EdgeHUD->CharacterOverlay->MatchCountdownText;
+	if (bHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;
+
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		EdgeHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
+	}
+}
+
+void AEdgePlayerController::SetHUDTime()
+{
+	uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetServerTime());
+	if (CountdownInt != SecondsLeft)
+	{
+		SetHUDMatchCountdown(MatchTime - GetServerTime());
+	}
+
+	CountdownInt = SecondsLeft;
+}
+
+void AEdgePlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
+{
+	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
+	ClientReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
+}
+
+void AEdgePlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
+{
+	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
+}
+
+float AEdgePlayerController::GetServerTime()
+{
+	if (HasAuthority()) return GetWorld()->GetTimeSeconds();
+	else return GetWorld()->GetTimeSeconds() + ClientServerDelta;
+}
+
+void AEdgePlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+	if (IsLocalController())
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
 	}
 }

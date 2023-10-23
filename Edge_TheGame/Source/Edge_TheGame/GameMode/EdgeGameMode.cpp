@@ -8,6 +8,32 @@
 #include "GameFramework/PlayerStart.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 
+AEdgeGameMode::AEdgeGameMode()
+{
+	bDelayedStart = true;
+}
+
+void AEdgeGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void AEdgeGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountDownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountDownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void AEdgeGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlayerController* VictimController, AEdgePlayerController* AttackerContoller)
 {
 	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) :nullptr;
@@ -43,3 +69,5 @@ void AEdgeGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* EL
 		RestartPlayerAtPlayerStart(ELimmedController, PlayerStarts[Selection]);
 	}
 }
+
+
