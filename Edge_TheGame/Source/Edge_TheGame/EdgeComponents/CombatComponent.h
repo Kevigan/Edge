@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Edge_TheGame/HUD/Edge_HUD.h"
 #include "Edge_TheGame/Weapon/WeaponTypes.h"
+#include "Edge_TheGame/EdgeTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -52,6 +53,13 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 		void ServerReload();
+
+	void HandleReload();
+
+	UFUNCTION(BlueprintCallable)
+		void FinishReloading();
+
+	int32 AmountToReload();
 
 private:
 	UPROPERTY()
@@ -128,6 +136,14 @@ private:
 		int32 StartingARAmmo = 30;
 
 	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+		ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+		void OnRep_CombatState();
+
+		void UpdateAmmoValues();
 
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }

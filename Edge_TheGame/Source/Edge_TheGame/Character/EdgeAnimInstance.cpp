@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Edge_TheGame/Weapon/Weapon.h"
+#include "Edge_TheGame/EdgeTypes/CombatState.h"
 
 void UEdgeAnimInstance::NativeInitializeAnimation()
 {
@@ -71,6 +72,9 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - EdgeCharacter->GetHitTarget()));
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.f);
 		}
-
 	}
+
+	bUseFABRIK = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bUseAimOffsets = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bTransformRightHand = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }

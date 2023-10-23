@@ -176,9 +176,9 @@ void AEdgeCharacter::PlayReloadMontage()
 
 		switch (Combat->EquippedWeapon->GetWeaponType())
 		{
-			case EWeaponType::EWT_AssaulRifle:
-				SectionName = FName("Rifle");
-				break;
+		case EWeaponType::EWT_AssaulRifle:
+			SectionName = FName("Rifle");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -577,6 +577,12 @@ FVector AEdgeCharacter::GetHitTarget() const
 {
 	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;
+}
+
+ECombatState AEdgeCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
 }
 
 void AEdgeCharacter::Destroyed()
