@@ -34,14 +34,24 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
 		TSubclassOf<class UCharacterOverlay> CharacterOverlayClass;
 
-	class UCharacterOverlay* CharacterOverlay;
+	UPROPERTY()
+		class UCharacterOverlay* CharacterOverlay;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
 
+	void AddCharacterOverlay();
+
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UUserWidget> AnnouncementClass;
+
+	UPROPERTY()
+		class UAnnouncement* Announcement;
+
+		void AddAnnouncement();
+
 protected:
 	virtual void BeginPlay() override;
-	void AddCharacterOverlay();
 
 private:
 	FHUDPackage HUDPackage;

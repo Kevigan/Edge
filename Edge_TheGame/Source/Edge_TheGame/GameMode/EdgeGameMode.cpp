@@ -8,6 +8,11 @@
 #include "GameFramework/PlayerStart.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");
+}
+
 AEdgeGameMode::AEdgeGameMode()
 {
 	bDelayedStart = true;
@@ -32,12 +37,34 @@ void AEdgeGameMode::Tick(float DeltaTime)
 			StartMatch();
 		}
 	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		CountDownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountDownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown);
+		}
+	}
+}
+
+void AEdgeGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		AEdgePlayerController* EdgePlayer = Cast<AEdgePlayerController>(*It);
+		if (EdgePlayer)
+		{
+			EdgePlayer->OnMatchStateSet(MatchState);
+		}
+	}
 }
 
 void AEdgeGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlayerController* VictimController, AEdgePlayerController* AttackerContoller)
 {
-	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) :nullptr;
-	AEdgePlayerState* VictimPlayerState = VictimController ? Cast<AEdgePlayerState>(VictimController->PlayerState) :nullptr;
+	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) : nullptr;
+	AEdgePlayerState* VictimPlayerState = VictimController ? Cast<AEdgePlayerState>(VictimController->PlayerState) : nullptr;
 
 	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
 	{
@@ -65,7 +92,7 @@ void AEdgeGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* EL
 	{
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-		int32 Selection = FMath::RandRange(0,PlayerStarts.Num() - 1);
+		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(ELimmedController, PlayerStarts[Selection]);
 	}
 }
