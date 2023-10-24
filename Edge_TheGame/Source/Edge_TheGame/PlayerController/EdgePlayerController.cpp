@@ -53,16 +53,18 @@ void AEdgePlayerController::ServerCheckMatchState_Implementation()
 	{
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
+		CooldownTime = GameMode->CooldownTime;
 		levelStartingTime = GameMode->LevelStartingTime;
 		MatchState = GameMode->GetMatchState();
-		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, levelStartingTime);
+		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, levelStartingTime, CooldownTime);
 	}
 }
 
-void AEdgePlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime)
+void AEdgePlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown)
 {
 	WarmupTime = Warmup;
 	MatchTime = Match;
+	CooldownTime = Cooldown;
 	levelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);
@@ -165,6 +167,11 @@ void AEdgePlayerController::SetHUDMatchCountdown(float CountdownTime)
 	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HealthBar && EdgeHUD->CharacterOverlay->MatchCountdownText;
 	if (bHUDValid)
 	{
+		if (CountdownTime < 0.f)
+		{
+			EdgeHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;
 
@@ -179,6 +186,11 @@ void AEdgePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 	bool bHUDValid = EdgeHUD && EdgeHUD->Announcement && EdgeHUD->Announcement->WarmupTime;
 	if (bHUDValid)
 	{
+		if (CountdownTime < 0.f)
+		{
+			EdgeHUD->Announcement->WarmupTime->SetText(FText());
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - Minutes * 60;
 
@@ -189,16 +201,25 @@ void AEdgePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 
 void AEdgePlayerController::SetHUDTime()
 {
-	float TimeLeft =  0.f;
+	float TimeLeft = 0.f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + levelStartingTime;
-	else if(MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + levelStartingTime;
-		
-	
+	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + levelStartingTime;
+	else if (MatchState == MatchState::Cooldown) TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + levelStartingTime;
 
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	if (HasAuthority())
+	{
+		EdgeGameMode = EdgeGameMode == nullptr ? Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this)) : EdgeGameMode;
+		if (EdgeGameMode)
+		{
+			SecondsLeft = FMath::CeilToInt(EdgeGameMode->GetCountdownTime() + levelStartingTime);
+		}
+	}
+
 	if (CountdownInt != SecondsLeft)
 	{
-		if (MatchState == MatchState::WaitingToStart)
+		if (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
 		{
 			SetHUDAnnouncementCountdown(TimeLeft);
 		}
@@ -298,12 +319,18 @@ void AEdgePlayerController::HandleMatchHasStarted()
 void AEdgePlayerController::HandleCooldown()
 {
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+	
 	if (EdgeHUD)
 	{
 		EdgeHUD->CharacterOverlay->RemoveFromParent();
-		if (EdgeHUD->Announcement)
+		bool bHUDValid = EdgeHUD->Announcement && EdgeHUD->Announcement->AnnouncementText && EdgeHUD->Announcement->InfoText;
+		if (bHUDValid)
 		{
 			EdgeHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+			FString AnnouncementText("New Match Starts In:");
+			EdgeHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+			EdgeHUD->Announcement->InfoText->SetText(FText());
+			
 		}
 	}
 }

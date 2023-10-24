@@ -42,4 +42,7 @@ protected:
 
 private:
 	float CountDownTime = 0.f;
+
+public:
+	FORCEINLINE float GetCountdownTime() const {return CountDownTime;}
 };
