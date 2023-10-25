@@ -12,6 +12,8 @@
 #include "Edge_TheGame/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
 #include "Edge_TheGame/EdgeComponents/CombatComponent.h"
+#include "Edge_TheGame/GameState/EdgeGameState.h"
+#include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 
 void AEdgePlayerController::BeginPlay()
 {
@@ -330,7 +332,36 @@ void AEdgePlayerController::HandleCooldown()
 			EdgeHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText("New Match Starts In:");
 			EdgeHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
-			EdgeHUD->Announcement->InfoText->SetText(FText());
+
+			AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+			AEdgePlayerState* EdgePlayerState = GetPlayerState<AEdgePlayerState>();
+			if (EdgeGameState && EdgePlayerState)
+			{
+				TArray<AEdgePlayerState*> TopPlayers = EdgeGameState->TopScoringPlayers;
+				FString InfoTextString;
+				if (TopPlayers.Num() == 0)
+				{
+					InfoTextString = FString("There is no winner");
+				}
+				else if (TopPlayers.Num() == 1 && TopPlayers[0] == EdgePlayerState)
+				{
+					InfoTextString = FString("You are the winner!");
+				}
+				else if (TopPlayers.Num() == 1)
+				{
+					InfoTextString = FString::Printf(TEXT("Winner: \n%s"), *TopPlayers[0]->GetPlayerName());
+				}
+				else if (TopPlayers.Num() > 1)
+				{
+					InfoTextString = FString("Players tied for the win:\n");
+					for (auto TiedPlayer : TopPlayers)
+					{
+					InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+					}
+				}
+				EdgeHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
+			}
+
 
 		}
 	}

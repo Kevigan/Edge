@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
+#include "Edge_TheGame/GameState/EdgeGameState.h"
 
 namespace MatchState
 {
@@ -76,9 +77,12 @@ void AEdgeGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlay
 	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) : nullptr;
 	AEdgePlayerState* VictimPlayerState = VictimController ? Cast<AEdgePlayerState>(VictimController->PlayerState) : nullptr;
 
-	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	AEdgeGameState* EdgeGameState = GetGameState<AEdgeGameState>();
+
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && EdgeGameState)
 	{
 		AttackerPlayerState->AddToScore(1.0f);
+		EdgeGameState->UpdateTopScore(AttackerPlayerState);
 	}
 	if (VictimPlayerState)
 	{
