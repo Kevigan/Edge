@@ -48,6 +48,12 @@ void AEdgeGameMode::Tick(float DeltaTime)
 	else if (MatchState == MatchState::Cooldown)
 	{
 		CountDownTime = CooldownTime + WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("cooldownTime: %f"), CountDownTime));
+		if (CountDownTime <= 0.f)
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("restarting"));
+			RestartGame();
+		}
 	}
 }
 

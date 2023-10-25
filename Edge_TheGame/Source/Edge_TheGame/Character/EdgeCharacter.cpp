@@ -61,6 +61,7 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME_CONDITION(AEdgeCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(AEdgeCharacter, Health);
+	DOREPLIFETIME(AEdgeCharacter, bDisableGameplay);
 }
 
 void AEdgeCharacter::BeginPlay()
@@ -77,6 +78,19 @@ void AEdgeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	RotateInPlace(DeltaTime);
+	HideCameraIfCharacterClose();
+	PollInit();
+}
+
+void AEdgeCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay) 
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
 	{
 		AimOffset(DeltaTime);
@@ -90,9 +104,6 @@ void AEdgeCharacter::Tick(float DeltaTime)
 		}
 		CalculateAO_Pitch();
 	}
-
-	HideCameraIfCharacterClose();
-	PollInit();
 }
 
 void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -211,10 +222,7 @@ void AEdgeCharacter::MulticastElim_Implementation()
 	//Disable character movement
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-	if (EdgePlayerController)
-	{
-		DisableInput(EdgePlayerController);
-	}
+	bDisableGameplay = true;
 	//Disable collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -254,6 +262,7 @@ void AEdgeCharacter::PlayHitUI()
 
 void AEdgeCharacter::MoveFoward(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -264,6 +273,7 @@ void AEdgeCharacter::MoveFoward(float Value)
 
 void AEdgeCharacter::MoveRight(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -284,6 +294,7 @@ void AEdgeCharacter::LookUp(float Value)
 
 void AEdgeCharacter::EquipButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		if (HasAuthority())
@@ -307,6 +318,7 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 
 void AEdgeCharacter::CrouchButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -319,6 +331,7 @@ void AEdgeCharacter::CrouchButtonPressed()
 
 void AEdgeCharacter::ReloadButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->Reload();
@@ -327,6 +340,7 @@ void AEdgeCharacter::ReloadButtonPressed()
 
 void AEdgeCharacter::AimButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(true);
@@ -335,6 +349,7 @@ void AEdgeCharacter::AimButtonPressed()
 
 void AEdgeCharacter::AimButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(false);
@@ -429,6 +444,7 @@ void AEdgeCharacter::SimProxiesTurn()
 
 void AEdgeCharacter::Jump()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -441,6 +457,7 @@ void AEdgeCharacter::Jump()
 
 void AEdgeCharacter::FireButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->FireButtonPressed(true);
@@ -449,6 +466,7 @@ void AEdgeCharacter::FireButtonPressed()
 
 void AEdgeCharacter::FireButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -588,6 +606,11 @@ ECombatState AEdgeCharacter::GetCombatState() const
 void AEdgeCharacter::Destroyed()
 {
 	Super::Destroyed();
+
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
 }
 
 

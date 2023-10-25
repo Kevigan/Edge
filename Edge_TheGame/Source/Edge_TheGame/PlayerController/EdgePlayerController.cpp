@@ -11,6 +11,7 @@
 #include "Edge_TheGame/GameMode/EdgeGameMode.h"
 #include "Edge_TheGame/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
+#include "Edge_TheGame/EdgeComponents/CombatComponent.h"
 
 void AEdgePlayerController::BeginPlay()
 {
@@ -319,7 +320,7 @@ void AEdgePlayerController::HandleMatchHasStarted()
 void AEdgePlayerController::HandleCooldown()
 {
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
-	
+
 	if (EdgeHUD)
 	{
 		EdgeHUD->CharacterOverlay->RemoveFromParent();
@@ -330,7 +331,13 @@ void AEdgePlayerController::HandleCooldown()
 			FString AnnouncementText("New Match Starts In:");
 			EdgeHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 			EdgeHUD->Announcement->InfoText->SetText(FText());
-			
+
 		}
+	}
+	AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(GetPawn());
+	if (EdgeCharacter && EdgeCharacter->GetCombat())
+	{
+		EdgeCharacter->bDisableGameplay = true;
+		EdgeCharacter->GetCombat()->FireButtonPressed(false);
 	}
 }

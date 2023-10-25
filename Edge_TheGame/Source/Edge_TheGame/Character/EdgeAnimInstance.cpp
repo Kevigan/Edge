@@ -75,6 +75,6 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	bUseFABRIK = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
-	bUseAimOffsets = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
-	bTransformRightHand = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bUseAimOffsets = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading && !EdgeCharacter->GetDisableGameplay();
+	bTransformRightHand = EdgeCharacter->GetCombatState() != ECombatState::ECS_Reloading && !EdgeCharacter->GetDisableGameplay();
 }
