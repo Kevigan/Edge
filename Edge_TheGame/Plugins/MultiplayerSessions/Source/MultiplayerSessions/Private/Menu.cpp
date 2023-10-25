@@ -58,6 +58,18 @@ bool UMenu::Initialize()
 	{
 		HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
 	}
+	if (HostSammy1)
+	{
+		HostSammy1->OnClicked.AddDynamic(this, &ThisClass::Sammy1Clicked);
+	}
+	if (HostSammy2)
+	{
+		HostSammy2->OnClicked.AddDynamic(this, &ThisClass::Sammy2Clicked);
+	}
+	if (HostNico1)
+	{
+		HostNico1->OnClicked.AddDynamic(this, &ThisClass::Nico1Clicked);
+	}
 	if (JoinButton)
 	{
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
@@ -162,6 +174,37 @@ void UMenu::HostButtonClicked()
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
 	}
 		
+}
+
+void UMenu::Sammy1Clicked()
+{
+
+	HostSammy1->SetIsEnabled(false);
+	if (MultiplayerSessionsSubsystem)
+	{
+		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
+	}
+
+}
+
+void UMenu::Sammy2Clicked()
+{
+	HostSammy2->SetIsEnabled(false);
+	if (MultiplayerSessionsSubsystem)
+	{
+		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
+	}
+
+}
+
+void UMenu::Nico1Clicked()
+{
+	HostNico1->SetIsEnabled(false);
+	if (MultiplayerSessionsSubsystem)
+	{
+		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
+	}
+
 }
 
 void UMenu::JoinButtonClicked()

@@ -12,10 +12,11 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	if (NumberOfPlayers == 2)
 	{
 		UWorld* World = GetWorld();
-		if (World)
+		if (World && !ChosenLevelPath.IsEmpty())
 		{
 			bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/Level_1?listen"));
+			//World->ServerTravel(FString("/Game/Maps/Level_1?listen"));
+			World->ServerTravel(FString(ChosenLevelPath));
 		}
 	}
 }

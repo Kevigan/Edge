@@ -7,13 +7,21 @@
 #include "LobbyGameMode.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class EDGE_THEGAME_API ALobbyGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+protected:
+	UPROPERTY(BlueprintReadWrite, Category = Config)
+		FString ChosenLevelPath;
+
+private:
+
+
 };

@@ -42,10 +42,28 @@ private:
 	class UButton* HostButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* HostSammy1;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* HostSammy2;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* HostNico1;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* JoinButton;
 
 	UFUNCTION()
 	void HostButtonClicked();
+
+	UFUNCTION()
+	void Sammy1Clicked();
+
+	UFUNCTION()
+	void Sammy2Clicked();
+
+	UFUNCTION()
+	void Nico1Clicked();
 
 	UFUNCTION()
 	void JoinButtonClicked();
