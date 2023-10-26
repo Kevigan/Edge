@@ -35,7 +35,7 @@ void AEdgeGameMode::Tick(float DeltaTime)
 		CountDownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
 		if (CountDownTime <= 0.f)
 		{
-			StartMatch();
+			StartMatch();// sets MatchState to InProgress
 		}
 	}
 	else if (MatchState == MatchState::InProgress)
@@ -64,10 +64,12 @@ void AEdgeGameMode::OnMatchStateSet()
 
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
-		AEdgePlayerController* EdgePlayer = Cast<AEdgePlayerController>(*It);
-		if (EdgePlayer)
+		AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(*It);
+		if (EdgePlayerController)
 		{
-			EdgePlayer->OnMatchStateSet(MatchState);
+			EdgePlayerController->OnMatchStateSet(MatchState);
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("OnMatchStateSet")));
+
 		}
 	}
 }

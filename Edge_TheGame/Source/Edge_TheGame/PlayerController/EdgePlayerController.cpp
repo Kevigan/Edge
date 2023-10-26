@@ -71,6 +71,7 @@ void AEdgePlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch,
 	levelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(MatchState.ToString()));
 
 	if (EdgeHUD && MatchState == MatchState::WaitingToStart)
 	{
@@ -211,14 +212,14 @@ void AEdgePlayerController::SetHUDTime()
 
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
 		EdgeGameMode = EdgeGameMode == nullptr ? Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this)) : EdgeGameMode;
 		if (EdgeGameMode)
 		{
 			SecondsLeft = FMath::CeilToInt(EdgeGameMode->GetCountdownTime() + levelStartingTime);
 		}
-	}
+	}*/
 
 	if (CountdownInt != SecondsLeft)
 	{
@@ -283,6 +284,7 @@ void AEdgePlayerController::ReceivedPlayer()
 void AEdgePlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
+
 
 	if (MatchState == MatchState::InProgress)
 	{
@@ -356,7 +358,7 @@ void AEdgePlayerController::HandleCooldown()
 					InfoTextString = FString("Players tied for the win:\n");
 					for (auto TiedPlayer : TopPlayers)
 					{
-					InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
 					}
 				}
 				EdgeHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));

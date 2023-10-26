@@ -19,7 +19,7 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = Config)
-		FString ChosenLevelPath;
+		FString ChosenLevelPath = " /Game/Maps/Level_1?listen";
 
 private:
 
