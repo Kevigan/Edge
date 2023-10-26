@@ -65,14 +65,14 @@ protected:
 
 private:
 	UPROPERTY()
-		class AEdgeCharacter* Character;
+		class AEdgeCharacter* Character = nullptr;
 	UPROPERTY()
-		class AEdgePlayerController* Controller;
+		class AEdgePlayerController* Controller = nullptr;
 	UPROPERTY()
-		class AEdge_HUD* HUD;
+		class AEdge_HUD* HUD = nullptr;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-		AWeapon* EquippedWeapon;
+		AWeapon* EquippedWeapon = nullptr;
 
 	UPROPERTY(Replicated)
 		bool bAiming;

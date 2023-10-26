@@ -16,23 +16,23 @@ class EDGE_THEGAME_API UCharacterOverlay : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-		class UProgressBar* HealthBar;
+		class UProgressBar* HealthBar = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* HealthText;
+		class UTextBlock* HealthText = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* KillAmount;
+		UTextBlock* KillAmount = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* DeathAmount;
+		UTextBlock* DeathAmount = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* WeaponAmmoAmount;
+		UTextBlock* WeaponAmmoAmount = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* CarriedWeaponAmmoAmount;
+		UTextBlock* CarriedWeaponAmmoAmount = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		UTextBlock* MatchCountdownText;
+		UTextBlock* MatchCountdownText = nullptr;
 };

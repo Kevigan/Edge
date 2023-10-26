@@ -66,10 +66,10 @@ protected:
 		void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
 private:
 	UPROPERTY()
-		class AEdge_HUD* EdgeHUD;
+		class AEdge_HUD* EdgeHUD = nullptr;
 
 	UPROPERTY()
-		class AEdgeGameMode* EdgeGameMode;
+		class AEdgeGameMode* EdgeGameMode = nullptr;
 
 	float levelStartingTime = 0.f;
 	float MatchTime = 0.f;
@@ -84,7 +84,7 @@ private:
 		void OnRep_MatchState();
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay;
+		class UCharacterOverlay* CharacterOverlay = nullptr;
 	bool bInitializeCharacterOverlay = false;
 
 	float HUDHealth;

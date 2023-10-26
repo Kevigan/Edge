@@ -31,7 +31,7 @@ public:
 		void MulticastElim();
 
 	UPROPERTY()
-		class AEdgePlayerState* EdgePlayerState;
+		class AEdgePlayerState* EdgePlayerState = nullptr;
 
 	UPROPERTY(Replicated)
 		bool bDisableGameplay = false;
@@ -64,22 +64,22 @@ private:
 	class AEdge_HUD* HUD;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class USpringArmComponent* CameraBoom;
+		class USpringArmComponent* CameraBoom = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UWidgetComponent* OverHeadWidget;
+		class UWidgetComponent* OverHeadWidget = nullptr;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
-		class AWeapon* OverlappingWeapon;
+		class AWeapon* OverlappingWeapon = nullptr;
 
 	UFUNCTION()
 		void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		class UCombatComponent* Combat;
+		class UCombatComponent* Combat = nullptr;
 
 	UFUNCTION(Server, Reliable)
 		void ServerEquipButtonPressed();
@@ -97,13 +97,13 @@ private:
 	/// </summary>
 
 	UPROPERTY(EditAnywhere, Category = Config = Combat)
-		class UAnimMontage* FireWeaponMontage;
+		class UAnimMontage* FireWeaponMontage = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config = Combat)
-		class UAnimMontage* ReloadMontage;
+		class UAnimMontage* ReloadMontage = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config = Combat)
-		class UAnimMontage* ElimMontage;
+		class UAnimMontage* ElimMontage = nullptr;
 
 	void HideCameraIfCharacterClose();
 
