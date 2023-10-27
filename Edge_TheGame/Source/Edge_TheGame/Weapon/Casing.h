@@ -22,11 +22,11 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* CasingMesh;
+		UStaticMeshComponent* CasingMesh = nullptr;
 
 	UPROPERTY(EditAnywhere)
 		float ShellInjectionImpulse;
 
 	UPROPERTY(EditAnywhere)
-		class USoundCue* ShellSound;
+		class USoundCue* ShellSound = nullptr;
 };

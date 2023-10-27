@@ -21,6 +21,7 @@ void AEdgePlayerController::BeginPlay()
 
 	EdgeHUD = Cast<AEdge_HUD>(GetHUD());
 	ServerCheckMatchState();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("PlayerController")));
 }
 
 void AEdgePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -205,6 +206,18 @@ void AEdgePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 
 void AEdgePlayerController::SetHUDTime()
 {
+	if (HasAuthority())
+	{
+		EdgeGameMode = EdgeGameMode == nullptr ? Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this)) : EdgeGameMode;
+		if (EdgeGameMode)
+		{
+			//SecondsLeft = FMath::CeilToInt(EdgeGameMode->GetCountdownTime()/* + EdgeGameMode->LevelStartingTime*/);
+			levelStartingTime = EdgeGameMode->LevelStartingTime;
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("gameModeStartingTime: %f"), EdgeGameMode->LevelStartingTime));
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("ServerlevelStartingTime: %f"), levelStartingTime));
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("MatchState: %s"), *MatchState.ToString()));
+		}
+	}
 	float TimeLeft = 0.f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + levelStartingTime;
 	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + levelStartingTime;
@@ -212,14 +225,7 @@ void AEdgePlayerController::SetHUDTime()
 
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 
-	/*if (HasAuthority())
-	{
-		EdgeGameMode = EdgeGameMode == nullptr ? Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this)) : EdgeGameMode;
-		if (EdgeGameMode)
-		{
-			SecondsLeft = FMath::CeilToInt(EdgeGameMode->GetCountdownTime() + levelStartingTime);
-		}
-	}*/
+	GetWorld()->GetTimeSeconds();
 
 	if (CountdownInt != SecondsLeft)
 	{

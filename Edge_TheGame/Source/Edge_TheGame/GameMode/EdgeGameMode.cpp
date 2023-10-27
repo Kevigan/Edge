@@ -23,6 +23,8 @@ void AEdgeGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("GameMode")));
+
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }
 
@@ -56,6 +58,11 @@ void AEdgeGameMode::Tick(float DeltaTime)
 			RestartGame();
 		}
 	}
+	if (HasAuthority())
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("GameModeServerCountdown: %f"), CountDownTime));
+	}
+	
 }
 
 void AEdgeGameMode::OnMatchStateSet()

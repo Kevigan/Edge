@@ -11,11 +11,16 @@ struct FHUDPackage
 {
 	GENERATED_BODY()
 public:
-	class UTexture2D* CrosshairsCenter;
-	UTexture2D* CrosshairsLeft;
-	UTexture2D* CrosshairsRight;
-	UTexture2D* CrosshairsTop;
-	UTexture2D* CrosshairsBottom;
+	UPROPERTY()
+		class UTexture2D* CrosshairsCenter;
+	UPROPERTY()
+		UTexture2D* CrosshairsLeft;
+	UPROPERTY()
+		UTexture2D* CrosshairsRight;
+	UPROPERTY()
+		UTexture2D* CrosshairsTop;
+	UPROPERTY()
+		UTexture2D* CrosshairsBottom;
 	float CrosshairSpread;
 	FLinearColor CrosshairsColor;
 };
@@ -35,7 +40,7 @@ public:
 		TSubclassOf<class UCharacterOverlay> CharacterOverlayClass;
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay;
+		class UCharacterOverlay* CharacterOverlay = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
@@ -46,9 +51,9 @@ public:
 		TSubclassOf<class UUserWidget> AnnouncementClass;
 
 	UPROPERTY()
-		class UAnnouncement* Announcement;
+		class UAnnouncement* Announcement = nullptr;
 
-		void AddAnnouncement();
+	void AddAnnouncement();
 
 protected:
 	virtual void BeginPlay() override;

@@ -99,10 +99,10 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		USkeletalMeshComponent* WeaponMesh;
+		USkeletalMeshComponent* WeaponMesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class USphereComponent* AreaSphere;
+		class USphereComponent* AreaSphere = nullptr;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 		EWeaponState WeaponState;
@@ -111,10 +111,10 @@ private:
 		void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class UWidgetComponent* PickupWidget;
+		class UWidgetComponent* PickupWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config)
-		class UAnimationAsset* FireAnimation;
+		class UAnimationAsset* FireAnimation = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<class ACasing> CasingClass;
@@ -131,9 +131,9 @@ private:
 		int32 MagCapacity;
 
 	UPROPERTY()
-		class AEdgeCharacter* EdgeOwnerCharacter;
+		class AEdgeCharacter* EdgeOwnerCharacter = nullptr;
 	UPROPERTY()
-		class AEdgePlayerController* EdgeOwnerController;
+		class AEdgePlayerController* EdgeOwnerController = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		EWeaponType WeaponType;
