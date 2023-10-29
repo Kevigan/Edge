@@ -39,21 +39,28 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
 		TSubclassOf<class UCharacterOverlay> CharacterOverlayClass;
 
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UUserWidget> MiniMapOverlayClass;
+
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UUserWidget> AnnouncementClass;
+
 	UPROPERTY()
 		class UCharacterOverlay* CharacterOverlay = nullptr;
+
+	UPROPERTY()
+		class UUserWidget* MiniMapOverlay = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
 
 	void AddCharacterOverlay();
 
-	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
-		TSubclassOf<class UUserWidget> AnnouncementClass;
-
 	UPROPERTY()
 		class UAnnouncement* Announcement = nullptr;
 
 	void AddAnnouncement();
+	void AddMiniMap();
 
 protected:
 	virtual void BeginPlay() override;

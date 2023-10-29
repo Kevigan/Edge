@@ -21,6 +21,7 @@
 #include "TimerManager.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 #include "Edge_TheGame/Weapon/WeaponTypes.h"
+#include "Components/SceneCaptureComponent2D.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -53,6 +54,11 @@ AEdgeCharacter::AEdgeCharacter()
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
 
+	SpringarmMiniMap = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringarm"));
+	SpringarmMiniMap->SetupAttachment(RootComponent);
+
+	SceneCaptureMiniMap2D = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapSceneCaptureComp"));
+	SceneCaptureMiniMap2D->SetupAttachment(SpringarmMiniMap);
 }
 
 void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -72,6 +78,7 @@ void AEdgeCharacter::BeginPlay()
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
 	}
+	//SpawnPlayerIndicator();
 }
 
 void AEdgeCharacter::Tick(float DeltaTime)
@@ -85,7 +92,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 
 void AEdgeCharacter::RotateInPlace(float DeltaTime)
 {
-	if (bDisableGameplay) 
+	if (bDisableGameplay)
 	{
 		bUseControllerRotationYaw = false;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
@@ -111,6 +118,10 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::Jump);
+	PlayerInputComponent->BindAction("Test", IE_Pressed, this, &ThisClass::TestSpawnActor);
+	PlayerInputComponent->BindAction("Test2", IE_Pressed, this, &ThisClass::TestSpawnActor2);
+
+
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ThisClass::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ThisClass::ReloadButtonPressed);
@@ -263,6 +274,78 @@ void AEdgeCharacter::PlayHitUI()
 	if (HUD)
 	{
 		//HUD->ReceiveOnShowHitUI();
+	}
+}
+
+void AEdgeCharacter::SpawnPlayerIndicator_Implementation()
+{
+	ReceiveOnSpawnPlayerIndicator();
+}
+
+void AEdgeCharacter::TestSpawnActor()
+{
+	ServerTestSpawn();
+}
+
+void AEdgeCharacter::TestSpawnActor2()
+{
+	ServerTestSpawn2();
+}
+
+void AEdgeCharacter::ServerTestSpawn_Implementation()
+{
+	//MulticastTestSpawn();
+	//ReceiveOnSpawnPlayerIndicator();
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		World->SpawnActor<AActor>(
+			ActorToSpawnClass,
+			FVector(-260.f,290.f,1260.f),
+			FRotator(0.f,0.f,0.f),
+			SpawnParams
+		);
+	}
+
+	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
+	if (HUD)
+	{
+		HUD->AddMiniMap();
+	}
+}
+
+void AEdgeCharacter::ServerTestSpawn2_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		World->SpawnActor<AActor>(
+			ActorToSpawnClass2,
+			GetActorLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+	}
+}
+
+void AEdgeCharacter::MulticastTestSpawn_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		World->SpawnActor<AActor>(
+			ActorToSpawnClass,
+			GetActorLocation(),
+			GetActorRotation()
+
+		);
 	}
 }
 

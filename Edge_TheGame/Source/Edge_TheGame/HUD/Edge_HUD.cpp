@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
 #include "Announcement.h"
+#include "Blueprint/UserWidget.h"
 
 
 
@@ -32,6 +33,16 @@ void AEdge_HUD::AddAnnouncement()
 	{
 		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
 		Announcement->AddToViewport();
+	}
+}
+
+void AEdge_HUD::AddMiniMap()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && MiniMapOverlayClass)
+	{
+		MiniMapOverlay = CreateWidget<UUserWidget>(PlayerController, MiniMapOverlayClass);
+		MiniMapOverlay->AddToViewport();
 	}
 }
 

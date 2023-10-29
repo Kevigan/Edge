@@ -56,10 +56,35 @@ protected:
 	void FireButtonReleased();
 	void UpdateHUDHealth();
 	void PlayHitUI();
+
+	UFUNCTION(Client, Reliable)
+		void SpawnPlayerIndicator();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
+		void ReceiveOnSpawnPlayerIndicator();
+
+	void TestSpawnActor();
+	void TestSpawnActor2();
+
+	UFUNCTION(Client, Reliable)
+		void ServerTestSpawn();
+
+	UFUNCTION(Client, Reliable)
+		void ServerTestSpawn2();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastTestSpawn();
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		TSubclassOf<class AActor> ActorToSpawnClass;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		TSubclassOf<class AActor> ActorToSpawnClass2;
+
 	UFUNCTION()
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
-		void RotateInPlace(float DeltaTime);
+	void RotateInPlace(float DeltaTime);
 private:
 	class AEdge_HUD* HUD;
 
@@ -142,6 +167,11 @@ private:
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
 
+	UPROPERTY(VisibleAnywhere, Category = Config)
+		class USpringArmComponent* SpringarmMiniMap;
+
+	UPROPERTY(VisibleAnywhere, Category = Config)
+		class USceneCaptureComponent2D* SceneCaptureMiniMap2D;
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
@@ -157,6 +187,8 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
-	FORCEINLINE UCombatComponent* GetCombat() const {return Combat;}
-	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay;}
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
+	UFUNCTION(BlueprintCallable)
+		AEdge_HUD* GetEdgeHUD() { return HUD; }
 };
