@@ -63,23 +63,30 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnSpawnPlayerIndicator();
 
-	void TestSpawnActor();
-	void TestSpawnActor2();
+	void SpawnMiniMapOnBeginPlay();
+
+	UFUNCTION(Server, Reliable)
+		void SpawnMiniMapServer();
 
 	UFUNCTION(Client, Reliable)
-		void ServerTestSpawn();
+		void ClientSpawnMiniMap();
 
-	UFUNCTION(Client, Reliable)
-		void ServerTestSpawn2();
+	void SpawnMiniMap();
 
-	UFUNCTION(NetMulticast, Reliable)
-		void MulticastTestSpawn();
+	float ControllerYaw;
 
-	UPROPERTY(EditAnywhere, Category = Config)
-		TSubclassOf<class AActor> ActorToSpawnClass;
+	FTimerHandle InitializeMiniMapTimer;
+	void InitializeMiniMapTimerFinished();
 
 	UPROPERTY(EditAnywhere, Category = Config)
-		TSubclassOf<class AActor> ActorToSpawnClass2;
+		TSubclassOf<class AActor> MiniMapClass;
+
+	AActor* MiniMapActor = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		TSubclassOf<class AActor> PlayerIndicatorClass;
+
+	AActor* PlayerIndicatorActor = nullptr;
 
 	UFUNCTION()
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
@@ -181,7 +188,10 @@ public:
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FVector GetHitTarget() const;
-	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
@@ -191,4 +201,8 @@ public:
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	UFUNCTION(BlueprintCallable)
 		AEdge_HUD* GetEdgeHUD() { return HUD; }
+
+	UFUNCTION(BlueprintCallable)
+		USpringArmComponent* GetSpringarm() { return CameraBoom; }
+
 };

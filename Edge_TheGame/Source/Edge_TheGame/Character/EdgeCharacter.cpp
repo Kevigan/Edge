@@ -54,11 +54,11 @@ AEdgeCharacter::AEdgeCharacter()
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
 
-	SpringarmMiniMap = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringarm"));
+	/*SpringarmMiniMap = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringarm"));
 	SpringarmMiniMap->SetupAttachment(RootComponent);
 
 	SceneCaptureMiniMap2D = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapSceneCaptureComp"));
-	SceneCaptureMiniMap2D->SetupAttachment(SpringarmMiniMap);
+	SceneCaptureMiniMap2D->SetupAttachment(SpringarmMiniMap);*/
 }
 
 void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -79,6 +79,7 @@ void AEdgeCharacter::BeginPlay()
 		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
 	}
 	//SpawnPlayerIndicator();
+	SpawnMiniMapOnBeginPlay();
 }
 
 void AEdgeCharacter::Tick(float DeltaTime)
@@ -88,6 +89,17 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);
 	HideCameraIfCharacterClose();
 	PollInit();
+
+	if (PlayerIndicatorActor)
+	{
+		PlayerIndicatorActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 1000.f));
+
+	}
+	if (MiniMapActor)
+	{
+		MiniMapActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 10000.f));
+		MiniMapActor->SetActorRotation(FRotator(0.f, CameraBoom->GetTargetRotation().Yaw, 0.f));
+	}
 }
 
 void AEdgeCharacter::RotateInPlace(float DeltaTime)
@@ -118,9 +130,6 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::Jump);
-	PlayerInputComponent->BindAction("Test", IE_Pressed, this, &ThisClass::TestSpawnActor);
-	PlayerInputComponent->BindAction("Test2", IE_Pressed, this, &ThisClass::TestSpawnActor2);
-
 
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ThisClass::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::CrouchButtonPressed);
@@ -282,32 +291,40 @@ void AEdgeCharacter::SpawnPlayerIndicator_Implementation()
 	ReceiveOnSpawnPlayerIndicator();
 }
 
-void AEdgeCharacter::TestSpawnActor()
+void AEdgeCharacter::SpawnMiniMapOnBeginPlay()
 {
-	ServerTestSpawn();
+	GetWorldTimerManager().SetTimer(
+		InitializeMiniMapTimer,
+		this,
+		&ThisClass::InitializeMiniMapTimerFinished,
+		1.f
+	);
 }
 
-void AEdgeCharacter::TestSpawnActor2()
+void AEdgeCharacter::SpawnMiniMapServer_Implementation()
 {
-	ServerTestSpawn2();
+	SpawnMiniMap();
 }
 
-void AEdgeCharacter::ServerTestSpawn_Implementation()
+void AEdgeCharacter::SpawnMiniMap()
 {
-	//MulticastTestSpawn();
-	//ReceiveOnSpawnPlayerIndicator();
-
 	UWorld* World = GetWorld();
-	if (World)
+	if (World && MiniMapClass)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
-		World->SpawnActor<AActor>(
-			ActorToSpawnClass,
-			FVector(-260.f,290.f,1260.f),
-			FRotator(0.f,0.f,0.f),
+		MiniMapActor = World->SpawnActor<AActor>(
+			MiniMapClass,
+			FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 10000.f),
+			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
 		);
+		if (MiniMapActor)
+		{
+			//MiniMapActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
+			//MiniMapActor->AttachToComponent(CameraBoom, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
+			//MiniMapActor->SetActorRelativeLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 100.f));
+		}
 	}
 
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
@@ -315,37 +332,43 @@ void AEdgeCharacter::ServerTestSpawn_Implementation()
 	{
 		HUD->AddMiniMap();
 	}
-}
-
-void AEdgeCharacter::ServerTestSpawn2_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
+	//UWorld* World = GetWorld();
+	if (World && PlayerIndicatorClass)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
-		World->SpawnActor<AActor>(
-			ActorToSpawnClass2,
+		PlayerIndicatorActor = World->SpawnActor<AActor>(
+			PlayerIndicatorClass,
 			GetActorLocation(),
-			GetActorRotation(),
+			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
 		);
+		if (PlayerIndicatorActor)
+		{
+			//PlayerIndicatorActor->Owner = this;
+			PlayerIndicatorActor->SetOwner(this);
+		}
 	}
 }
 
-void AEdgeCharacter::MulticastTestSpawn_Implementation()
+void AEdgeCharacter::ClientSpawnMiniMap_Implementation()
 {
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		World->SpawnActor<AActor>(
-			ActorToSpawnClass,
-			GetActorLocation(),
-			GetActorRotation()
+	//MulticastTestSpawn();
+	//ReceiveOnSpawnPlayerIndicator();
+	if (!IsLocallyControlled()) return;
+	SpawnMiniMap();
 
-		);
+}
+
+void AEdgeCharacter::InitializeMiniMapTimerFinished()
+{
+	if (HasAuthority() && IsLocallyControlled())
+	{
+		SpawnMiniMapServer();
+	}
+	else if (!HasAuthority() && IsLocallyControlled())
+	{
+		ClientSpawnMiniMap();
 	}
 }
 
@@ -374,6 +397,7 @@ void AEdgeCharacter::MoveRight(float Value)
 void AEdgeCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
+	ControllerYaw = Value;
 }
 
 void AEdgeCharacter::LookUp(float Value)
