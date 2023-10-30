@@ -168,7 +168,16 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitUI();
-
+	// On hit change crosshair color
+	ACharacter* OwnerCharacter = Cast<ACharacter>(DamageCauser->GetOwner());
+	if (OwnerCharacter && Health > 0.f)
+	{
+		AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
+		if (EdgeCharacterEnemy)
+		{
+			EdgeCharacterEnemy->ChangeCrosshairColor(FColor::Purple, 0.3f);
+		}
+	}
 	if (Health == 0.f)
 	{
 		AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
@@ -177,6 +186,17 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 			EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
 			AEdgePlayerController* AttackerController = Cast<AEdgePlayerController>(InstigatorController);
 			EdgeGameMode->PlayerEliminated(this, EdgePlayerController, AttackerController);
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("freeeeeeeeeeeee3!")));
+			// 
+			//On Death change crosshair color
+			if (OwnerCharacter)
+			{
+				AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
+				if (EdgeCharacterEnemy)
+				{
+					EdgeCharacterEnemy->ChangeCrosshairColor(FColor::Red, 0.8f);
+				}
+			}
 		}
 	}
 }
@@ -687,6 +707,29 @@ void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 		LastWeapon->ShowPickupWidget(false);
 	}
 }
+
+void AEdgeCharacter::ChangeCrosshairColor(FColor Color, float Time)
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->ColorToChange = Color;
+	}
+	GetWorldTimerManager().SetTimer(
+		CrosshairTimer,
+		this,
+		&ThisClass::CrosshairTimerFinished,
+		Time
+	);
+}
+
+void AEdgeCharacter::CrosshairTimerFinished()
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->ColorToChange = FColor::White;
+	}
+}
+
 
 bool AEdgeCharacter::IsWeaponEquipped()
 {

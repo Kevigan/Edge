@@ -171,15 +171,15 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
-		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		/*if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{
 			HUDPackage.CrosshairsColor = FLinearColor::Red;
 		}
 		else
 		{
 			HUDPackage.CrosshairsColor = ColorToChange;
-		}
-
+		}*/
+		HUDPackage.CrosshairsColor = ColorToChange;
 
 		if (!TraceHitResult.bBlockingHit) TraceHitResult.ImpactPoint = End;
 	}

@@ -36,6 +36,10 @@ public:
 	UPROPERTY(Replicated)
 		bool bDisableGameplay = false;
 
+		void ChangeCrosshairColor(FColor Color, float Time);
+		FTimerHandle CrosshairTimer;
+		void CrosshairTimerFinished();
+
 protected:
 	virtual void BeginPlay() override;
 
