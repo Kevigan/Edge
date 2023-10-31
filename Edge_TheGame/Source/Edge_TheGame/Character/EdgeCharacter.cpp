@@ -744,7 +744,6 @@ void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth)
 	{
 		Color = FColor::Red;
 		Time = 0.8f;
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("gtgtgtgtg!")));
 
 	}
 
@@ -843,6 +842,12 @@ void AEdgeCharacter::Destroyed()
 	{
 		MiniMapActor->Destroy();
 		MiniMapActor = nullptr;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("gtgtgtgtg!")));
+	}
+	if (PlayerIndicatorActor != nullptr)
+	{
+		PlayerIndicatorActor->Destroy();
+		PlayerIndicatorActor = nullptr;
 	}
 }
 
