@@ -36,11 +36,19 @@ public:
 	UPROPERTY(Replicated)
 		bool bDisableGameplay = false;
 
-		void ChangeCrosshairColor(FColor Color, float Time);
-		FTimerHandle CrosshairTimer;
-		void CrosshairTimerFinished();
+	//Change crosshair color on hit and on death
+	void ChangeCrosshairColor(float EnemyHealth);
 
-		void AddKillText();
+	UFUNCTION(Client, Reliable)
+		void ClientChangeCrosshairColor(float EnemyHealth);
+
+	FTimerHandle CrosshairTimer;
+	void CrosshairTimerFinished();
+
+	void AddKillText();
+
+	UFUNCTION(Client, Reliable)
+		void ClientAddKillText();
 
 
 protected:

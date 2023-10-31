@@ -169,14 +169,24 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 	UpdateHUDHealth();
 	PlayHitUI();
 	// On hit change crosshair color
+
 	ACharacter* OwnerCharacter = Cast<ACharacter>(DamageCauser->GetOwner());
 	if (OwnerCharacter && Health > 0.f)
 	{
 		AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
 		if (EdgeCharacterEnemy)
 		{
-			EdgeCharacterEnemy->ChangeCrosshairColor(FColor::Purple, 0.3f);
+			//EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+			if (!EdgeCharacterEnemy->IsLocallyControlled())
+			{
+				EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
+			}
+			else
+			{
+				EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+			}
 		}
+
 	}
 	if (Health == 0.f)
 	{
@@ -194,8 +204,16 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 				AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
 				if (EdgeCharacterEnemy)
 				{
-					EdgeCharacterEnemy->ChangeCrosshairColor(FColor::Red, 0.8f);
-					EdgeCharacterEnemy->AddKillText();
+					if (!EdgeCharacterEnemy->IsLocallyControlled())
+					{
+						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
+						EdgeCharacterEnemy->ClientAddKillText();
+					}
+					else
+					{
+						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+						EdgeCharacterEnemy->AddKillText();
+					}
 				}
 			}
 		}
@@ -712,8 +730,24 @@ void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void AEdgeCharacter::ChangeCrosshairColor(FColor Color, float Time)
+void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth)
 {
+	FColor Color = FColor::White;
+	float Time = 0.f;
+
+	if (EnemyHealth > 0.f)
+	{
+		Color = FColor::Purple;
+		Time = 0.3f;
+	}
+	else
+	{
+		Color = FColor::Red;
+		Time = 0.8f;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("gtgtgtgtg!")));
+
+	}
+
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->ColorToChange = Color;
@@ -726,6 +760,12 @@ void AEdgeCharacter::ChangeCrosshairColor(FColor Color, float Time)
 	);
 }
 
+void AEdgeCharacter::ClientChangeCrosshairColor_Implementation(float EnemyHealth)
+{
+	ChangeCrosshairColor(EnemyHealth);
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("Health: %f"), EnemyHealth));
+}
+
 void AEdgeCharacter::CrosshairTimerFinished()
 {
 	if (Combat && Combat->EquippedWeapon)
@@ -735,6 +775,15 @@ void AEdgeCharacter::CrosshairTimerFinished()
 }
 
 void AEdgeCharacter::AddKillText()
+{
+	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
+	if (HUD)
+	{
+		HUD->AddKillText();
+	}
+}
+
+void AEdgeCharacter::ClientAddKillText_Implementation()
 {
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (HUD)
