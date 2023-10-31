@@ -195,6 +195,7 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 				if (EdgeCharacterEnemy)
 				{
 					EdgeCharacterEnemy->ChangeCrosshairColor(FColor::Red, 0.8f);
+					EdgeCharacterEnemy->AddKillText();
 				}
 			}
 		}
@@ -727,6 +728,15 @@ void AEdgeCharacter::CrosshairTimerFinished()
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->ColorToChange = FColor::White;
+	}
+}
+
+void AEdgeCharacter::AddKillText()
+{
+	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
+	if (HUD)
+	{
+		HUD->AddKillText();
 	}
 }
 

@@ -46,6 +46,16 @@ void AEdge_HUD::AddMiniMap()
 	}
 }
 
+void AEdge_HUD::AddKillText()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && KillTextOverlayClass)
+	{
+		KillTextOverlay = CreateWidget<UUserWidget>(PlayerController, KillTextOverlayClass);
+		KillTextOverlay->AddToViewport();
+	}
+}
+
 void AEdge_HUD::DrawHUD()
 {
 	Super::DrawHUD();

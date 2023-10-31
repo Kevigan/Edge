@@ -40,6 +40,9 @@ public:
 		FTimerHandle CrosshairTimer;
 		void CrosshairTimerFinished();
 
+		void AddKillText();
+
+
 protected:
 	virtual void BeginPlay() override;
 
