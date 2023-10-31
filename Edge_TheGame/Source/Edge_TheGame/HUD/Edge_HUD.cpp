@@ -7,6 +7,7 @@
 #include "CharacterOverlay.h"
 #include "Announcement.h"
 #include "Blueprint/UserWidget.h"
+#include "MenuWidget.h"
 
 
 
@@ -54,6 +55,33 @@ void AEdge_HUD::AddKillText()
 		KillTextOverlay = CreateWidget<UUserWidget>(PlayerController, KillTextOverlayClass);
 		KillTextOverlay->AddToViewport();
 	}
+}
+
+void AEdge_HUD::AddMenu()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && MenuWidgetClass)
+	{
+		MenuWidgetOverlay = CreateWidget<UMenuWidget>(PlayerController, MenuWidgetClass);
+		MenuWidgetOverlay->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->SetIgnoreLookInput(true);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu added")));
+}
+
+void AEdge_HUD::RemoveMenu()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && MenuWidgetOverlay)
+	{
+		MenuWidgetOverlay->RemoveFromParent();
+		PlayerController->bShowMouseCursor = false;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->SetIgnoreLookInput(false);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu removed")));
 }
 
 void AEdge_HUD::DrawHUD()

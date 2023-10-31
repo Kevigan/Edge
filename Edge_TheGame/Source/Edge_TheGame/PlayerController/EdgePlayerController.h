@@ -31,7 +31,8 @@ public:
 	void OnMatchStateSet(FName State);
 	void HandleMatchHasStarted();
 	void HandleCooldown();
-
+	void OpenMenu();
+	bool MenuOpen = false;
 
 protected:
 	virtual void BeginPlay() override;

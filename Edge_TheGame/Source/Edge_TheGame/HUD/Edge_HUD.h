@@ -43,19 +43,25 @@ public:
 		TSubclassOf<class UUserWidget> MiniMapOverlayClass;
 
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
-		TSubclassOf<class UUserWidget> KillTextOverlayClass;
+		TSubclassOf< UUserWidget> KillTextOverlayClass;
 
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
-		TSubclassOf<class UUserWidget> AnnouncementClass;
+		TSubclassOf< UUserWidget> AnnouncementClass;
+
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UMenuWidget> MenuWidgetClass;
 
 	UPROPERTY()
-		class UCharacterOverlay* CharacterOverlay = nullptr;
+		UCharacterOverlay* CharacterOverlay = nullptr;
 
 	UPROPERTY()
-		class UUserWidget* MiniMapOverlay = nullptr;
+		UUserWidget* MiniMapOverlay = nullptr;
 
 	UPROPERTY()
-		class UUserWidget* KillTextOverlay = nullptr;
+		UUserWidget* KillTextOverlay = nullptr;
+
+	UPROPERTY()
+		UMenuWidget* MenuWidgetOverlay = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
@@ -68,6 +74,8 @@ public:
 	void AddAnnouncement();
 	void AddMiniMap();
 	void AddKillText();
+	void AddMenu();
+	void RemoveMenu();
 
 protected:
 	virtual void BeginPlay() override;

@@ -382,3 +382,18 @@ void AEdgePlayerController::HandleCooldown()
 		EdgeCharacter->GetCombat()->FireButtonPressed(false);
 	}
 }
+
+void AEdgePlayerController::OpenMenu()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+	if (EdgeHUD && !MenuOpen)
+	{
+		EdgeHUD->AddMenu();
+		MenuOpen = true;
+	}
+	else if (EdgeHUD && MenuOpen)
+	{
+		EdgeHUD->RemoveMenu();
+		MenuOpen = false;
+	}
+}

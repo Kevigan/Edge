@@ -69,6 +69,7 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
+	void EscapeButtonPressed();
 	void UpdateHUDHealth();
 	void PlayHitUI();
 
