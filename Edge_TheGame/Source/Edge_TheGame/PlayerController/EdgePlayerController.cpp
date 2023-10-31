@@ -21,7 +21,6 @@ void AEdgePlayerController::BeginPlay()
 
 	EdgeHUD = Cast<AEdge_HUD>(GetHUD());
 	ServerCheckMatchState();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("PlayerController")));
 }
 
 void AEdgePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -319,7 +318,10 @@ void AEdgePlayerController::HandleMatchHasStarted()
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 	if (EdgeHUD)
 	{
-		EdgeHUD->AddCharacterOverlay();
+		if (EdgeHUD->CharacterOverlay == nullptr) EdgeHUD->AddCharacterOverlay();//fix for doubling Character Overlay
+
+		//EdgeHUD->AddCharacterOverlay();
+
 		if (EdgeHUD->Announcement)
 		{
 			EdgeHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);

@@ -231,6 +231,9 @@ void AEdgeCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_AssaulRifle:
 			SectionName = FName("Rifle");
 			break;
+		case EWeaponType::EWT_Pistol:
+			SectionName = FName("Pistol");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -786,6 +789,11 @@ void AEdgeCharacter::Destroyed()
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->EquippedWeapon->Dropped();
+	}
+	if (MiniMapActor != nullptr)
+	{
+		MiniMapActor->Destroy();
+		MiniMapActor = nullptr;
 	}
 }
 
