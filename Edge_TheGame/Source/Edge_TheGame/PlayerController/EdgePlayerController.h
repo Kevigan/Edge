@@ -65,6 +65,10 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 		void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
+
+	void HighPingWarning();
+	void StopHighPingWarning();
+	void CheckPing(float DeltaTime);
 private:
 	UPROPERTY()
 		class AEdge_HUD* EdgeHUD = nullptr;
@@ -92,4 +96,17 @@ private:
 	float HUDMaxHealth;
 	float HUDKills;
 	int32 HUDDeaths;
+
+	float HighPingRunningTime = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float HighPingDuration = 5.f;
+
+	float PingAnimationRunningTime = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float CheckPingFrequency = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float HighPingThreshold = 50.f;
 };

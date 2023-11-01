@@ -211,7 +211,10 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	SpendRound();
+	if (HasAuthority())// cosmetic stuff like above can spawn locally, spend round on server due lag
+	{
+		SpendRound();
+	}
 }
 
 void AWeapon::Dropped()

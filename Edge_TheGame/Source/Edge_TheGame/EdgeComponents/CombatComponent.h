@@ -9,7 +9,6 @@
 #include "Edge_TheGame/EdgeTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
-#define TRACE_LENGTH 80000.f
 
 class AWeapon;
 
@@ -42,6 +41,7 @@ protected:
 
 
 	void Fire();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(Server, Reliable)
 		void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -137,8 +137,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config = Ammo)
 		int32 StartingARAmmo = 30;
 
-		UPROPERTY(EditAnywhere, Category = Config = Ammo)
+	UPROPERTY(EditAnywhere, Category = Config = Ammo)
 		int32 StartingPistolAmmo = 30;
+
+	UPROPERTY(EditAnywhere, Category = Config = Ammo)
+		int32 StartingShotgunAmmo = 30;
 
 	void InitializeCarriedAmmo();
 
@@ -148,7 +151,7 @@ private:
 	UFUNCTION()
 		void OnRep_CombatState();
 
-		void UpdateAmmoValues();
+	void UpdateAmmoValues();
 
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }

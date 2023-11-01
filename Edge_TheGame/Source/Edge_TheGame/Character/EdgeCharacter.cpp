@@ -253,6 +253,9 @@ void AEdgeCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_Pistol:
 			SectionName = FName("Pistol");
 			break;
+		case EWeaponType::EWT_Shotgun:
+			SectionName = FName("Shotgun");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -453,14 +456,7 @@ void AEdgeCharacter::EquipButtonPressed()
 	if (bDisableGameplay) return;
 	if (Combat)
 	{
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		else
-		{
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 
@@ -635,7 +631,7 @@ void AEdgeCharacter::EscapeButtonPressed()
 	if (EdgePlayerController)
 	{
 		EdgePlayerController->OpenMenu();
-		
+
 	}
 }
 
@@ -801,7 +797,6 @@ void AEdgeCharacter::ClientAddKillText_Implementation()
 		HUD->AddKillText();
 	}
 }
-
 
 bool AEdgeCharacter::IsWeaponEquipped()
 {

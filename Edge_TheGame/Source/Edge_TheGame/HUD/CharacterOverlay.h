@@ -35,4 +35,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		UTextBlock* MatchCountdownText = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+		class UImage* HighPingImage = nullptr;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+		UWidgetAnimation* HighPingAnimation = nullptr;
 };

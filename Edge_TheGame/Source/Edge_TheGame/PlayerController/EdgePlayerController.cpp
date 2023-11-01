@@ -14,6 +14,7 @@
 #include "Edge_TheGame/EdgeComponents/CombatComponent.h"
 #include "Edge_TheGame/GameState/EdgeGameState.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
+#include "Components/Image.h"
 
 void AEdgePlayerController::BeginPlay()
 {
@@ -37,7 +38,39 @@ void AEdgePlayerController::Tick(float DeltaTime)
 	SetHUDTime();
 	CheckTimeSync(DeltaTime);
 	PollInit();
+	CheckPing(DeltaTime);
+
 }
+
+void AEdgePlayerController::CheckPing(float DeltaTime)
+{
+	HighPingRunningTime += DeltaTime;
+	if (HighPingRunningTime > CheckPingFrequency)
+	{
+		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
+		if (PlayerState)
+		{
+			if (PlayerState->GetPing() * 4 > HighPingThreshold) // ping is ccompressed; it´s actually ping / 4
+			{
+				HighPingWarning();
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		HighPingRunningTime = 0.f;
+	}
+	bool bHidePingAnimationPlaying = EdgeHUD && EdgeHUD->CharacterOverlay &&
+		EdgeHUD->CharacterOverlay->HighPingAnimation &&
+		EdgeHUD->CharacterOverlay->IsAnimationPlaying(EdgeHUD->CharacterOverlay->HighPingAnimation);
+	if (bHidePingAnimationPlaying)
+	{
+		PingAnimationRunningTime += DeltaTime;
+		if (PingAnimationRunningTime > HighPingDuration)
+		{
+			StopHighPingWarning();
+		}
+	}
+}
+
 
 void AEdgePlayerController::CheckTimeSync(float DeltaTime)
 {
@@ -46,6 +79,33 @@ void AEdgePlayerController::CheckTimeSync(float DeltaTime)
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
 		TimeSyncRunningTime = 0.f;
+	}
+}
+
+void AEdgePlayerController::HighPingWarning()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HighPingImage && EdgeHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		EdgeHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f);
+		EdgeHUD->CharacterOverlay->PlayAnimation(EdgeHUD->CharacterOverlay->HighPingAnimation, 0.f, 5);
+	}
+}
+
+void AEdgePlayerController::StopHighPingWarning()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HighPingImage && EdgeHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		EdgeHUD->CharacterOverlay->HighPingImage->SetOpacity(0.f);
+		if (EdgeHUD->CharacterOverlay->IsAnimationPlaying(EdgeHUD->CharacterOverlay->HighPingAnimation))
+		{
+			EdgeHUD->CharacterOverlay->StopAnimation(EdgeHUD->CharacterOverlay->HighPingAnimation);
+		}
 	}
 }
 
