@@ -50,7 +50,8 @@ public:
 	UFUNCTION(Client, Reliable)
 		void ClientAddKillText();
 
-
+	UFUNCTION(BlueprintImplementableEvent)
+		void ShowSniperScopeWidget(bool bShowScope);
 protected:
 	virtual void BeginPlay() override;
 

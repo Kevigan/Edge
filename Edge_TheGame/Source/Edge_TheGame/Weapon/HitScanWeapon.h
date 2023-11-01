@@ -31,6 +31,8 @@ protected:
 		float Damage = 20.f;
 
 private:
+	UPROPERTY(EditAnywhere, Category = Config)
+		UParticleSystem* BeamParticles;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		UParticleSystem* MuzzleFlash;
