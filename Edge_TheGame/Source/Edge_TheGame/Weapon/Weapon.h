@@ -76,6 +76,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = WeaponSettings)
 		class USoundCue* EquipSound;
 
+	bool bDestroyWeapon = false;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -141,6 +143,7 @@ private:
 public:
 
 	void SetWeaponState(EWeaponState State);
+	FORCEINLINE EWeaponState GetWeaponState() { return WeaponState; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }

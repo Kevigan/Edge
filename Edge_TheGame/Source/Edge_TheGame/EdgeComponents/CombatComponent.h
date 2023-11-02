@@ -63,6 +63,12 @@ protected:
 
 	int32 AmountToReload();
 
+	void DropEquippedWeapon();
+	void AttachActorToRightHand(AActor* ActorToAttach);
+	void UpdateCarriedAmmo();
+	void PlayEquippedWeaponSound();
+	void ReloadEmptyWeapon();
+
 private:
 	UPROPERTY()
 		class AEdgeCharacter* Character = nullptr;

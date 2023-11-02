@@ -52,6 +52,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void ShowSniperScopeWidget(bool bShowScope);
+
+		void SpawnDefaultWeapon();
 protected:
 	virtual void BeginPlay() override;
 
@@ -72,6 +74,7 @@ protected:
 	void FireButtonReleased();
 	void EscapeButtonPressed();
 	void UpdateHUDHealth();
+	void UpdateHUDAmmo();
 	void PlayHitUI();
 
 	UFUNCTION(Client, Reliable)
@@ -132,6 +135,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 		void ServerEquipButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+		void ServerSpawnDefaultWeapon();
 
 	float AO_Yaw;
 	float InterpAO_Yaw;
@@ -196,6 +202,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Config)
 		class USceneCaptureComponent2D* SceneCaptureMiniMap2D;
+
+	/**
+	 * Default Weapon
+	 */
+	UPROPERTY(EditAnywhere, Category = Config)
+		TSubclassOf<AWeapon> DefaultWeaponClass;
+
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();

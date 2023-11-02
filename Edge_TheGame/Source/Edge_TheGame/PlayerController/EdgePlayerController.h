@@ -92,10 +92,22 @@ private:
 		class UCharacterOverlay* CharacterOverlay = nullptr;
 	bool bInitializeCharacterOverlay = false;
 
+	bool bInitializeHUDHealth = false;
 	float HUDHealth;
+
 	float HUDMaxHealth;
+
+	bool bInitializeHUDKills = false;
 	float HUDKills;
+
+	bool bInitializeHUDDeaths = false;
 	int32 HUDDeaths;
+
+	bool bInitializeCarriedAmmo = false;
+	float HUDCarriedAmmo;
+
+	bool bInitializeWeaponAmmo = false;
+	float HUDWeaponAmmo;
 
 	float HighPingRunningTime = 0.f;
 
@@ -109,4 +121,5 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		float HighPingThreshold = 50.f;
+
 };

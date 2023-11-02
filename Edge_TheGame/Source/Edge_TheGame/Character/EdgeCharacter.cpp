@@ -73,6 +73,8 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void AEdgeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	//SpawnDefaultWeapon();
+	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	if (HasAuthority())
 	{
@@ -268,7 +270,14 @@ void AEdgeCharacter::Elim()
 {
 	if (Combat && Combat->EquippedWeapon)
 	{
-		Combat->EquippedWeapon->Dropped();
+		if (Combat->EquippedWeapon->bDestroyWeapon)
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			Combat->EquippedWeapon->Dropped();
+		}
 	}
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(
@@ -702,6 +711,16 @@ void AEdgeCharacter::UpdateHUDHealth()
 	}
 }
 
+void AEdgeCharacter::UpdateHUDAmmo()
+{
+	EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
+	if (EdgePlayerController && Combat && Combat->EquippedWeapon)
+	{
+		EdgePlayerController->SetHUDCarriedWeaponAmmo(Combat->CarriedAmmo);
+		EdgePlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+	}
+}
+
 void AEdgeCharacter::PollInit()
 {
 	if (EdgePlayerState == nullptr)
@@ -711,6 +730,18 @@ void AEdgeCharacter::PollInit()
 		{
 			EdgePlayerState->AddToScore(0.f);
 			EdgePlayerState->AddToDeath(0);
+		}
+	}
+	if (EdgePlayerController == nullptr)
+	{
+		EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
+		if (EdgePlayerController)
+		{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,FString(TEXT("GGGGGGGGGGGG")));
+			SpawnDefaultWeapon();
+			//ServerSpawnDefaultWeapon();
+			UpdateHUDAmmo();
+			UpdateHUDHealth();
 		}
 	}
 }
@@ -805,6 +836,37 @@ void AEdgeCharacter::ClientAddKillText_Implementation()
 		HUD->AddKillText();
 	}
 }
+
+void AEdgeCharacter::SpawnDefaultWeapon()
+{
+	AEdgeGameMode* EdgeGameMode = Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if (EdgeGameMode && World && !bElimmed && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
+	}
+}
+
+void AEdgeCharacter::ServerSpawnDefaultWeapon_Implementation()
+{
+	AEdgeGameMode* EdgeGameMode = Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if (EdgeGameMode && World && !bElimmed && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
+	}
+}
+
 
 bool AEdgeCharacter::IsWeaponEquipped()
 {

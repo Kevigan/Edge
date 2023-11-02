@@ -71,7 +71,6 @@ void AEdgePlayerController::CheckPing(float DeltaTime)
 	}
 }
 
-
 void AEdgePlayerController::CheckTimeSync(float DeltaTime)
 {
 	TimeSyncRunningTime += DeltaTime;
@@ -155,16 +154,18 @@ void AEdgePlayerController::SetHUDHealth(float Health, float MaxHealth)
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 
 	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HealthBar && EdgeHUD->CharacterOverlay->HealthText;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("healt: %f"), Health));
 	if (bHUDValid)
 	{
 		const float HealthPercent = Health / MaxHealth;
 		EdgeHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		EdgeHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeHUDHealth = true;
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
 	}
@@ -181,7 +182,7 @@ void AEdgePlayerController::SetHUDKills(float Score)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeHUDKills = true;
 		HUDKills = Score;
 	}
 
@@ -198,7 +199,7 @@ void AEdgePlayerController::SetHUDDeath(int32 Value)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeHUDDeaths = true;
 		HUDDeaths = Value;
 	}
 }
@@ -212,6 +213,11 @@ void AEdgePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		EdgeHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 	}
+	else
+	{
+		bInitializeWeaponAmmo = true;
+		HUDWeaponAmmo = Ammo;
+	}
 }
 
 void AEdgePlayerController::SetHUDCarriedWeaponAmmo(int32 Ammo)
@@ -222,6 +228,11 @@ void AEdgePlayerController::SetHUDCarriedWeaponAmmo(int32 Ammo)
 	{
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		EdgeHUD->CharacterOverlay->CarriedWeaponAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+	else
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = Ammo;
 	}
 }
 
@@ -310,9 +321,12 @@ void AEdgePlayerController::PollInit()
 			CharacterOverlay = EdgeHUD->CharacterOverlay;
 			if (CharacterOverlay)
 			{
-				SetHUDHealth(HUDHealth, HUDMaxHealth);
-				SetHUDKills(HUDKills);
-				SetHUDDeath(HUDDeaths);
+				//GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Red, FString::Printf(TEXT("healt: %f"), HUDHealth));
+				if (bInitializeHUDHealth)SetHUDHealth(HUDHealth, HUDMaxHealth);
+				if (bInitializeHUDKills)SetHUDKills(HUDKills);
+				if (bInitializeHUDDeaths)SetHUDDeath(HUDDeaths);
+				if (bInitializeCarriedAmmo) SetHUDCarriedWeaponAmmo(HUDCarriedAmmo);
+				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
 			}
 		}
 	}
