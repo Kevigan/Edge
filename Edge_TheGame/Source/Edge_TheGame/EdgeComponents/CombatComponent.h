@@ -24,6 +24,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
+	void SwapWeapons();
 	void Reload();
 	FLinearColor ColorToChange;
 
@@ -39,6 +40,8 @@ protected:
 	UFUNCTION()
 		void OnRep_EquippedWeapon();
 
+	UFUNCTION()
+		void OnRep_SecondaryWeapon();
 
 	void Fire();
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
@@ -65,9 +68,12 @@ protected:
 
 	void DropEquippedWeapon();
 	void AttachActorToRightHand(AActor* ActorToAttach);
+	void AttachActorToBackpack(AActor* ActorToAttach);
 	void UpdateCarriedAmmo();
-	void PlayEquippedWeaponSound();
+	void PlayEquippedWeaponSound(AWeapon* WeaponToEquip);
 	void ReloadEmptyWeapon();
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 private:
 	UPROPERTY()
@@ -79,6 +85,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 		AWeapon* EquippedWeapon = nullptr;
+
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+		AWeapon* SecondaryWeapon = nullptr;
 
 	UPROPERTY(Replicated)
 		bool bAiming;
@@ -163,5 +172,6 @@ private:
 
 public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
+	bool ShouldSwapWeapons();
 
 };

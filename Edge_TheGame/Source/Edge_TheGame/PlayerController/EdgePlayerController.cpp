@@ -130,7 +130,7 @@ void AEdgePlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch,
 	levelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(MatchState.ToString()));
+
 
 	if (EdgeHUD && MatchState == MatchState::WaitingToStart)
 	{
@@ -154,7 +154,7 @@ void AEdgePlayerController::SetHUDHealth(float Health, float MaxHealth)
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 
 	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HealthBar && EdgeHUD->CharacterOverlay->HealthText;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("healt: %f"), Health));
+	
 	if (bHUDValid)
 	{
 		const float HealthPercent = Health / MaxHealth;

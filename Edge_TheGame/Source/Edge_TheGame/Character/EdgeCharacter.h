@@ -62,6 +62,7 @@ protected:
 	void Turn(float Value);
 	void LookUp(float Value);
 	void EquipButtonPressed();
+	void MouseWheelTurned();
 	void CrouchButtonPressed();
 	void ReloadButtonPressed();
 	void AimButtonPressed();
@@ -76,6 +77,8 @@ protected:
 	void UpdateHUDHealth();
 	void UpdateHUDAmmo();
 	void PlayHitUI();
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyWeapons();
 
 	UFUNCTION(Client, Reliable)
 		void SpawnPlayerIndicator();

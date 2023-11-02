@@ -141,6 +141,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ThisClass::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ThisClass::FireButtonReleased);
 	PlayerInputComponent->BindAction("ESC", IE_Pressed, this, &ThisClass::EscapeButtonPressed);
+	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
@@ -268,17 +269,7 @@ void AEdgeCharacter::PlayReloadMontage()
 
 void AEdgeCharacter::Elim()
 {
-	if (Combat && Combat->EquippedWeapon)
-	{
-		if (Combat->EquippedWeapon->bDestroyWeapon)
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			Combat->EquippedWeapon->Dropped();
-		}
-	}
+	DropOrDestroyWeapons();
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -323,6 +314,34 @@ void AEdgeCharacter::ElimTimerFinished()
 	if (EdgeGameMode)
 	{
 		EdgeGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void AEdgeCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon == nullptr) return;
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
+	}
+}
+
+void AEdgeCharacter::DropOrDestroyWeapons()
+{
+	if (Combat)
+	{
+		if (Combat->EquippedWeapon)
+		{
+			DropOrDestroyWeapon(Combat->EquippedWeapon);
+		}
+		if (Combat->SecondaryWeapon)
+		{
+			DropOrDestroyWeapon(Combat->SecondaryWeapon);
+		}
 	}
 }
 
@@ -468,6 +487,14 @@ void AEdgeCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
+void AEdgeCharacter::MouseWheelTurned()
+{
+	if (Combat && Combat->ShouldSwapWeapons())
+	{
+		Combat->SwapWeapons();
+	}
+}
+
 void AEdgeCharacter::EquipButtonPressed()
 {
 	if (bDisableGameplay) return;
@@ -481,7 +508,14 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (Combat)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		if (OverlappingWeapon)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else if (Combat->ShouldSwapWeapons()) // Make new funtion for using mouse wheel
+		{
+			Combat->SwapWeapons();
+		}
 	}
 }
 
@@ -737,7 +771,6 @@ void AEdgeCharacter::PollInit()
 		EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
 		if (EdgePlayerController)
 		{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,FString(TEXT("GGGGGGGGGGGG")));
 			SpawnDefaultWeapon();
 			//ServerSpawnDefaultWeapon();
 			UpdateHUDAmmo();
@@ -867,7 +900,6 @@ void AEdgeCharacter::ServerSpawnDefaultWeapon_Implementation()
 	}
 }
 
-
 bool AEdgeCharacter::IsWeaponEquipped()
 {
 	return (Combat && Combat->EquippedWeapon);
@@ -918,7 +950,6 @@ void AEdgeCharacter::Destroyed()
 	{
 		MiniMapActor->Destroy();
 		MiniMapActor = nullptr;
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("gtgtgtgtg!")));
 	}
 	if (PlayerIndicatorActor != nullptr)
 	{
