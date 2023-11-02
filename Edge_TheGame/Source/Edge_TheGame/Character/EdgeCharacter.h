@@ -45,10 +45,10 @@ public:
 	FTimerHandle CrosshairTimer;
 	void CrosshairTimerFinished();
 
-	void AddKillText();
+	void AddKillText(AEdgeCharacter* EdgeCharacter);
 
 	UFUNCTION(Client, Reliable)
-		void ClientAddKillText();
+		void ClientAddKillText(AEdgeCharacter* EdgeCharacter);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void ShowSniperScopeWidget(bool bShowScope);

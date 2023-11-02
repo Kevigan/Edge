@@ -76,6 +76,7 @@ public:
 	void AddKillText();
 	void AddMenu();
 	void RemoveMenu();
+	void SetEnemyKilledText(const FString& EnemyName);
 
 protected:
 	virtual void BeginPlay() override;

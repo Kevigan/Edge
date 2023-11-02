@@ -211,12 +211,12 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 					if (!EdgeCharacterEnemy->IsLocallyControlled())
 					{
 						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->ClientAddKillText();
+						EdgeCharacterEnemy->ClientAddKillText(EdgeCharacterEnemy);
 					}
 					else
 					{
 						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->AddKillText();
+						EdgeCharacterEnemy->AddKillText(EdgeCharacterEnemy);
 					}
 				}
 			}
@@ -852,21 +852,32 @@ void AEdgeCharacter::CrosshairTimerFinished()
 	}
 }
 
-void AEdgeCharacter::AddKillText()
+void AEdgeCharacter::AddKillText(AEdgeCharacter* EdgeCharacter)
 {
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (HUD)
 	{
 		HUD->AddKillText();
+		APlayerState* EnemyPlayerState = EdgeCharacter->GetPlayerState();
+		if (EnemyPlayerState)
+		{
+			HUD->SetEnemyKilledText(EnemyPlayerState->GetPlayerName());
+		}
+
 	}
 }
 
-void AEdgeCharacter::ClientAddKillText_Implementation()
+void AEdgeCharacter::ClientAddKillText_Implementation(AEdgeCharacter* EdgeCharacter)
 {
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (HUD)
 	{
 		HUD->AddKillText();
+		APlayerState* EnemyPlayerState = EdgeCharacter->GetPlayerState();
+		if (EnemyPlayerState)
+		{
+			HUD->SetEnemyKilledText(EnemyPlayerState->GetPlayerName());
+		}
 	}
 }
 

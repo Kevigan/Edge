@@ -8,6 +8,7 @@
 #include "Announcement.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuWidget.h"
+#include "Components/TextBlock.h"
 
 
 
@@ -82,6 +83,16 @@ void AEdge_HUD::RemoveMenu()
 		PlayerController->SetIgnoreLookInput(false);
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu removed")));
+}
+
+void AEdge_HUD::SetEnemyKilledText(const FString& EnemyName)
+{
+	if (CharacterOverlay)
+	{
+		FString NewStringText =  "You destroyed " + EnemyName + "!";
+		CharacterOverlay->EnemyKilledText->SetText(FText::FromString(NewStringText));
+		CharacterOverlay->ReceiveOnSetEnemyKilledText(EnemyName);
+	}
 }
 
 void AEdge_HUD::DrawHUD()

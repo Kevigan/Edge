@@ -15,6 +15,9 @@ class EDGE_THEGAME_API UCharacterOverlay : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnSetEnemyKilledText(const FString& EnemyName);
+
 	UPROPERTY(meta = (BindWidget))
 		class UProgressBar* HealthBar = nullptr;
 
@@ -41,4 +44,7 @@ public:
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 		UWidgetAnimation* HighPingAnimation = nullptr;
+		
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* EnemyKilledText = nullptr;
 };
