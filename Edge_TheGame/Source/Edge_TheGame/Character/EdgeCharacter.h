@@ -53,7 +53,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void ShowSniperScopeWidget(bool bShowScope);
 
-		void SpawnDefaultWeapon();
+	void SpawnDefaultWeapon();
 protected:
 	virtual void BeginPlay() override;
 
@@ -138,6 +138,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 		void ServerEquipButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+		void ServerMouseWheelTurned();
 
 	UFUNCTION(Server, Reliable)
 		void ServerSpawnDefaultWeapon();

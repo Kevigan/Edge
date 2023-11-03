@@ -489,6 +489,15 @@ void AEdgeCharacter::LookUp(float Value)
 
 void AEdgeCharacter::MouseWheelTurned()
 {
+	if (bDisableGameplay) return;
+	if (Combat && Combat->ShouldSwapWeapons())
+	{
+		ServerMouseWheelTurned();
+	}
+}
+
+void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
+{
 	if (Combat && Combat->ShouldSwapWeapons())
 	{
 		Combat->SwapWeapons();
