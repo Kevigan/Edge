@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void ShowSniperScopeWidget(bool bShowScope);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void HideShowSniperScopeWidget();
+
 	void SpawnDefaultWeapon();
 protected:
 	virtual void BeginPlay() override;

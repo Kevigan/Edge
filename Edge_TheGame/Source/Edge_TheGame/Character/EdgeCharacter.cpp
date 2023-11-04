@@ -364,7 +364,7 @@ void AEdgeCharacter::PlayHitUI()
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (HUD)
 	{
-		//HUD->ReceiveOnShowHitUI();
+		HUD->ReceiveOnShowHitUI();
 	}
 }
 
@@ -498,6 +498,10 @@ void AEdgeCharacter::MouseWheelTurned()
 
 void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 {
+	if (Combat && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	{
+		HideShowSniperScopeWidget();
+	}
 	if (Combat && Combat->ShouldSwapWeapons())
 	{
 		Combat->SwapWeapons();
@@ -515,6 +519,10 @@ void AEdgeCharacter::EquipButtonPressed()
 
 void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 {
+	if (Combat && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	{
+		HideShowSniperScopeWidget();
+	}
 	if (Combat)
 	{
 		if (OverlappingWeapon)
