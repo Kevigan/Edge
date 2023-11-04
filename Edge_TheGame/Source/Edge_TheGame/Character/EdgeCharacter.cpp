@@ -174,13 +174,13 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 	PlayHitUI();
 	// On hit change crosshair color
 
-	ACharacter* OwnerCharacter = Cast<ACharacter>(DamageCauser->GetOwner());
+	ACharacter* OwnerCharacter = Cast<ACharacter>(InstigatorController->GetCharacter());
 	if (OwnerCharacter && Health > 0.f)
 	{
 		AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
 		if (EdgeCharacterEnemy)
 		{
-			//EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+			
 			if (!EdgeCharacterEnemy->IsLocallyControlled())
 			{
 				EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
@@ -211,12 +211,12 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 					if (!EdgeCharacterEnemy->IsLocallyControlled())
 					{
 						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->ClientAddKillText(EdgeCharacterEnemy);
+						EdgeCharacterEnemy->ClientAddKillText(this);
 					}
 					else
 					{
 						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->AddKillText(EdgeCharacterEnemy);
+						EdgeCharacterEnemy->AddKillText(this); 
 					}
 				}
 			}
