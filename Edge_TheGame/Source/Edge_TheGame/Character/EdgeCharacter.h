@@ -244,5 +244,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		USpringArmComponent* GetSpringarm() { return CameraBoom; }
-
+	bool IsLocallyReloading();
 };

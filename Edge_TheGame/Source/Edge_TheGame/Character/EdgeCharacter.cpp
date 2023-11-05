@@ -180,7 +180,7 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 		AEdgeCharacter* EdgeCharacterEnemy = Cast<AEdgeCharacter>(OwnerCharacter);
 		if (EdgeCharacterEnemy)
 		{
-			
+
 			if (!EdgeCharacterEnemy->IsLocallyControlled())
 			{
 				EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
@@ -216,7 +216,7 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 					else
 					{
 						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->AddKillText(this); 
+						EdgeCharacterEnemy->AddKillText(this);
 					}
 				}
 			}
@@ -954,6 +954,12 @@ ECombatState AEdgeCharacter::GetCombatState() const
 {
 	if (Combat == nullptr) return ECombatState::ECS_MAX;
 	return Combat->CombatState;
+}
+
+bool AEdgeCharacter::IsLocallyReloading()
+{
+	if (Combat == nullptr) return false;
+	return Combat->bLocallyReloading;
 }
 
 void AEdgeCharacter::Destroyed()
