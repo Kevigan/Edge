@@ -32,7 +32,9 @@ public:
 	void HandleMatchHasStarted();
 	void HandleCooldown();
 	void OpenMenu();
+	void ShowTeamData();
 	bool MenuOpen = false;
+	bool TeamDataOpen = false;
 
 protected:
 	virtual void BeginPlay() override;

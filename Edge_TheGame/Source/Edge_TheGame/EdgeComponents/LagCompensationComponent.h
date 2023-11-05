@@ -56,6 +56,11 @@ private:
 	UPROPERTY()
 		class AEdgePlayerController* Controller;
 
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float MaxRecordTime = 4.f;
+
 public:
 
 

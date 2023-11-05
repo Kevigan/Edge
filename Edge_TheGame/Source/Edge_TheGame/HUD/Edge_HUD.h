@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
 		TSubclassOf<class UMenuWidget> MenuWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UTeamDataWidget> TeamDataWidgetClass;
+
 	UPROPERTY()
 		UCharacterOverlay* CharacterOverlay = nullptr;
 
@@ -62,6 +65,9 @@ public:
 
 	UPROPERTY()
 		UMenuWidget* MenuWidgetOverlay = nullptr;
+
+	UPROPERTY()
+		UTeamDataWidget* TeamDataWidgetOverlay = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
@@ -77,6 +83,8 @@ public:
 	void AddMenu();
 	void RemoveMenu();
 	void SetEnemyKilledText(const FString& EnemyName);
+	void AddTeamDataWidget();
+	void RemoveTeamDataWidget();
 
 protected:
 	virtual void BeginPlay() override;

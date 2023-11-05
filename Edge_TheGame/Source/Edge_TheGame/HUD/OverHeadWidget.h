@@ -16,7 +16,7 @@ class EDGE_THEGAME_API UOverHeadWidget : public UUserWidget
 	
 public:
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* DisplayText;
+	class UTextBlock* DisplayText = nullptr;
 
 	void SetDisplayText(FString TextToDisplay);
 

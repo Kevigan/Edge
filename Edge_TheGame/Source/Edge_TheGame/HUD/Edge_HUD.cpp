@@ -9,6 +9,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MenuWidget.h"
 #include "Components/TextBlock.h"
+#include "TeamDataWidget.h"
 
 
 
@@ -69,7 +70,7 @@ void AEdge_HUD::AddMenu()
 		PlayerController->SetInputMode(FInputModeGameOnly());
 		PlayerController->SetIgnoreLookInput(true);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu added")));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu added")));
 }
 
 void AEdge_HUD::RemoveMenu()
@@ -82,7 +83,7 @@ void AEdge_HUD::RemoveMenu()
 		PlayerController->SetInputMode(FInputModeGameOnly());
 		PlayerController->SetIgnoreLookInput(false);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu removed")));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Menu removed")));
 }
 
 void AEdge_HUD::SetEnemyKilledText(const FString& EnemyName)
@@ -92,6 +93,31 @@ void AEdge_HUD::SetEnemyKilledText(const FString& EnemyName)
 		FString NewStringText =  "You destroyed " + EnemyName + "!";
 		CharacterOverlay->EnemyKilledText->SetText(FText::FromString(NewStringText));
 		CharacterOverlay->ReceiveOnSetEnemyKilledText(EnemyName);
+	}
+}
+
+void AEdge_HUD::AddTeamDataWidget()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && TeamDataWidgetClass)
+	{
+		TeamDataWidgetOverlay = CreateWidget<UTeamDataWidget>(PlayerController, TeamDataWidgetClass);
+		TeamDataWidgetOverlay->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->SetIgnoreLookInput(true);
+	}
+}
+
+void AEdge_HUD::RemoveTeamDataWidget()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && TeamDataWidgetOverlay)
+	{
+		TeamDataWidgetOverlay->RemoveFromParent();
+		PlayerController->bShowMouseCursor = false;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->SetIgnoreLookInput(false);
 	}
 }
 

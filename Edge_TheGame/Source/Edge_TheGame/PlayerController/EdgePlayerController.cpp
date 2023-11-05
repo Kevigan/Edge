@@ -471,3 +471,18 @@ void AEdgePlayerController::OpenMenu()
 		MenuOpen = false;
 	}
 }
+
+void AEdgePlayerController::ShowTeamData()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+	if (EdgeHUD && !TeamDataOpen)
+	{
+		EdgeHUD->AddTeamDataWidget();
+		TeamDataOpen = true;
+	}
+	else if (EdgeHUD && TeamDataOpen)
+	{
+		EdgeHUD->RemoveTeamDataWidget();
+		TeamDataOpen = false;
+	}
+}
