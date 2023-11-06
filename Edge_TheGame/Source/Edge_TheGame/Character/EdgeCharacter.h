@@ -308,6 +308,7 @@ public:
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const {return LagCompensation;}
 	UFUNCTION(BlueprintCallable)
 		AEdge_HUD* GetEdgeHUD() { return HUD; }
 
