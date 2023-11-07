@@ -27,8 +27,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Config)
 		class USoundCue* HitSound;
 
-	UPROPERTY(EditAnywhere, Category = Config)
-		float Damage = 20.f;
+	
 
 private:
 	UPROPERTY(EditAnywhere, Category = Config)

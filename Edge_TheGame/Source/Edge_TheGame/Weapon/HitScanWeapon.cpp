@@ -4,11 +4,13 @@
 #include "HitScanWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Edge_TheGame/Character/EdgeCharacter.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 #include "Sound/SoundCue.h"
 #include "DrawDebugHelpers.h"
 #include "WeaponTypes.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Edge_TheGame/EdgeComponents/LagCompensationComponent.h"
 
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -29,15 +31,33 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		WeaponTraceHit(Start, HitTarget, FireHit);
 
 		AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(FireHit.GetActor());
-		if (EdgeCharacter && HasAuthority() && InstigatorController)
+		if (EdgeCharacter && InstigatorController)
 		{
-			UGameplayStatics::ApplyDamage(
-				EdgeCharacter,
-				Damage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(
+					EdgeCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+			if(!HasAuthority() && bUseServerSideRewind)
+			{
+				EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(OwnerPawn) : EdgeOwnerCharacter;
+				EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(InstigatorController) : EdgeOwnerController;
+				if (EdgeOwnerController && EdgeOwnerCharacter && EdgeOwnerCharacter->GetLagCompensation() && EdgeOwnerCharacter->IsLocallyControlled())
+				{
+					EdgeOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+						EdgeCharacter,
+						Start,
+						HitTarget,
+						EdgeOwnerController->GetServerTime() - EdgeOwnerController->SingleTripTime,
+						this
+					);
+				}
+			}
 		}
 		if (ImpactParticles)
 		{
@@ -95,7 +115,7 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		}
 
 		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Orange, true);
-		GEngine->AddOnScreenDebugMessage(-1,2.f,FColor::Red,FString(TEXT("Hit")));
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Hit")));
 		if (BeamParticles)
 		{
 			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(

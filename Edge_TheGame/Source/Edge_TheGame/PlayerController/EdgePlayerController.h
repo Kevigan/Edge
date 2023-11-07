@@ -36,6 +36,8 @@ public:
 	bool MenuOpen = false;
 	bool TeamDataOpen = false;
 
+	float SingleTripTime = 0.f;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

@@ -3,10 +3,12 @@
 
 #include "ShotGun.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Edge_TheGame/Character/EdgeCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Edge_TheGame/Character/EdgeCharacter.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
+#include "Edge_TheGame/EdgeComponents/LagCompensationComponent.h"
 
 
 void AShotGun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
@@ -62,16 +64,36 @@ void AShotGun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				);
 			}
 		}
+		TArray<AEdgeCharacter*> HitCharacters;
+
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)
+			if (HitPair.Key && InstigatorController)
 			{
-				UGameplayStatics::ApplyDamage(
-					HitPair.Key, // character 
-					Damage * HitPair.Value, // multiply damage by number of times hit
-					InstigatorController,
-					this,
-					UDamageType::StaticClass()
+				if (HasAuthority() && !bUseServerSideRewind)
+				{
+					UGameplayStatics::ApplyDamage(
+						HitPair.Key, // character 
+						Damage * HitPair.Value, // multiply damage by number of times hit
+						InstigatorController,
+						this,
+						UDamageType::StaticClass()
+					);
+				}
+				HitCharacters.Add(HitPair.Key);
+			}
+		}
+		if (!HasAuthority() && bUseServerSideRewind)
+		{
+			EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(OwnerPawn) : EdgeOwnerCharacter;
+			EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(InstigatorController) : EdgeOwnerController;
+			if (EdgeOwnerController && EdgeOwnerCharacter && EdgeOwnerCharacter->GetLagCompensation() && EdgeOwnerCharacter->IsLocallyControlled())
+			{
+				EdgeOwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(
+					HitCharacters,
+					Start,
+					HitTargets,
+					EdgeOwnerController->GetServerTime() - EdgeOwnerController->SingleTripTime
 				);
 			}
 		}

@@ -131,6 +131,19 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Config = WeaponScatter)
 		float SphereRadius = 75.f;
 
+	UPROPERTY(EditAnywhere, Category = Config)
+		float Damage = 20.f;
+
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		bool bUseServerSideRewind = false;
+
+		UPROPERTY()
+		class AEdgeCharacter* EdgeOwnerCharacter = nullptr;
+
+	UPROPERTY()
+		class AEdgePlayerController* EdgeOwnerController = nullptr;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		USkeletalMeshComponent* WeaponMesh = nullptr;
@@ -167,14 +180,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config)
 		int32 MagCapacity;
 
-		// The number of unprocessed server requests for Ammo
-		// Incremented in SpendROund, decremented in ClientUpdateAmmo
+	// The number of unprocessed server requests for Ammo
+	// Incremented in SpendROund, decremented in ClientUpdateAmmo
 	int32 Sequence = 0;
-
-	UPROPERTY()
-		class AEdgeCharacter* EdgeOwnerCharacter = nullptr;
-	UPROPERTY()
-		class AEdgePlayerController* EdgeOwnerController = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		EWeaponType WeaponType;
@@ -193,4 +201,5 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 };
