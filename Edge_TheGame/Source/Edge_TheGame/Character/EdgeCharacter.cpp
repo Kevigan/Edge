@@ -61,7 +61,7 @@ AEdgeCharacter::AEdgeCharacter()
 	/*
 	*  Hit boxes for server-side rewind
 	*/
-	
+
 	head = CreateDefaultSubobject<UBoxComponent>(TEXT("head"));
 	head->SetupAttachment(GetMesh(), FName("head"));
 	HitCollisionBoxes.Add(FName("head"), head);
@@ -583,8 +583,16 @@ void AEdgeCharacter::LookUp(float Value)
 
 void AEdgeCharacter::MouseWheelTurned()
 {
-	if (bDisableGameplay) return;
-	if (Combat && Combat->ShouldSwapWeapons())
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied) return;
+	if ( Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	{
+		ShowSniperScopeWidget(true);
+	}
+	else if (Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->SecondaryWeapon->GetWeaponType() != EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	{
+		ShowSniperScopeWidget(false);
+	}
+	if (Combat->ShouldSwapWeapons())
 	{
 		ServerMouseWheelTurned();
 	}
@@ -592,10 +600,7 @@ void AEdgeCharacter::MouseWheelTurned()
 
 void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 {
-	if (Combat && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
-	{
-		HideShowSniperScopeWidget();
-	}
+
 	if (Combat && Combat->ShouldSwapWeapons())
 	{
 		Combat->SwapWeapons();
@@ -604,19 +609,28 @@ void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 
 void AEdgeCharacter::EquipButtonPressed()
 {
-	if (bDisableGameplay) return;
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied) return;
+	if (Combat->ShouldSwapWeapons())
+	{
+		if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+		{
+			ShowSniperScopeWidget(true);
+		}
+		else if (Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->SecondaryWeapon->GetWeaponType() != EWeaponType::EWT_SniperRifle && Combat->bAiming)
+		{
+			ShowSniperScopeWidget(false);
+		}
+	}
+
 	if (Combat)
 	{
 		ServerEquipButtonPressed();
 	}
+
 }
 
 void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 {
-	if (Combat && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
-	{
-		HideShowSniperScopeWidget();
-	}
 	if (Combat)
 	{
 		if (OverlappingWeapon)
@@ -625,6 +639,7 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation()
 		}
 		else if (Combat->ShouldSwapWeapons()) // Make new funtion for using mouse wheel
 		{
+
 			Combat->SwapWeapons();
 		}
 	}

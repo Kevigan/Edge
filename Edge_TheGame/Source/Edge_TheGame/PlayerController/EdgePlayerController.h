@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "EdgePlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
+
 /**
  *
  */
@@ -37,6 +39,8 @@ public:
 	bool TeamDataOpen = false;
 
 	float SingleTripTime = 0.f;
+
+	FHighPingDelegate HighPingDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -73,6 +77,7 @@ protected:
 	void HighPingWarning();
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
+
 private:
 	UPROPERTY()
 		class AEdge_HUD* EdgeHUD = nullptr;
@@ -122,6 +127,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		float CheckPingFrequency = 20.f;
+
+	UFUNCTION(Server, Reliable)
+		void ServerReportPingStatus(bool bHidePing);
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		float HighPingThreshold = 50.f;

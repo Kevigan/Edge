@@ -96,6 +96,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = WeaponScatter)
 		bool bUseScatter = false;
 
+	UPROPERTY(EditAnywhere, Category = Config = DrawDebug)
+		bool bDrawDebug = false;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnWeaponStateSet();
@@ -135,14 +138,17 @@ protected:
 		float Damage = 20.f;
 
 
-	UPROPERTY(EditAnywhere, Category = Config)
+	UPROPERTY(Replicated, EditAnywhere, Category = Config)
 		bool bUseServerSideRewind = false;
 
-		UPROPERTY()
+	UPROPERTY()
 		class AEdgeCharacter* EdgeOwnerCharacter = nullptr;
 
 	UPROPERTY()
 		class AEdgePlayerController* EdgeOwnerController = nullptr;
+
+	UFUNCTION()
+		void OnPingTooHigh(bool bPingTooHigh);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")

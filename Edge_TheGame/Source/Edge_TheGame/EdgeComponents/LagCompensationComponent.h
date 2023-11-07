@@ -97,11 +97,12 @@ public:
 		void ShotgunServerScoreRequest(const TArray<AEdgeCharacter*>& HitCharacters,
 			const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
 
+		bool bDrawDebug = false;
 protected:
 	virtual void BeginPlay() override;
 	void SaveFramePackage(FFramePackage& Package);
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
-	
+
 	void CacheBoxPositions(AEdgeCharacter* HitCharacter, FFramePackage& OutFramePackage);
 	void MoveBoxes(AEdgeCharacter* HitCharacter, const FFramePackage& Package);
 	void ResetHitBoxes(AEdgeCharacter* HitCharacter, const FFramePackage& Package);
@@ -117,7 +118,7 @@ protected:
 	/*
 	* Projectile
 	*/
-	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package,AEdgeCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
+	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, AEdgeCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
 
 	/*
 	* Shotgun

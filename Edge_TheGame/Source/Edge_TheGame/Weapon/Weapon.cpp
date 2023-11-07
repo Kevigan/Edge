@@ -61,6 +61,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -111,7 +112,7 @@ void AWeapon::SpendRound()
 
 void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 {
-	if(HasAuthority()) return;
+	if (HasAuthority()) return;
 
 	Ammo = ServerAmmo;
 	--Sequence;
@@ -182,6 +183,11 @@ void AWeapon::OnWeaponStateSet()
 	}
 }
 
+void AWeapon::OnPingTooHigh(bool bPingTooHigh)
+{
+	bUseServerSideRewind = !bPingTooHigh;
+}
+
 void AWeapon::OnRep_WeaponState()
 {
 	OnWeaponStateSet();
@@ -194,6 +200,16 @@ void AWeapon::OnEquipped()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	if (EdgeOwnerCharacter && bUseServerSideRewind)
+	{
+		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
+		if (EdgeOwnerController && HasAuthority() && !EdgeOwnerController->HighPingDelegate.IsBound())
+		{
+			EdgeOwnerController->HighPingDelegate.AddDynamic(this, &ThisClass::OnPingTooHigh);
+		}
+	}
 }
 
 void AWeapon::OnEquippedSecondary()
@@ -203,6 +219,16 @@ void AWeapon::OnEquippedSecondary()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	if (EdgeOwnerCharacter && bUseServerSideRewind)
+	{
+		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
+		if (EdgeOwnerController && HasAuthority() && EdgeOwnerController->HighPingDelegate.IsBound())
+		{
+			EdgeOwnerController->HighPingDelegate.RemoveDynamic(this, &ThisClass::OnPingTooHigh);
+		}
+	}
 }
 
 void AWeapon::OnDropped()
@@ -214,6 +240,16 @@ void AWeapon::OnDropped()
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetEnableGravity(true);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	if (EdgeOwnerCharacter && bUseServerSideRewind)
+	{
+		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
+		if (EdgeOwnerController && HasAuthority() && EdgeOwnerController->HighPingDelegate.IsBound())
+		{
+			EdgeOwnerController->HighPingDelegate.RemoveDynamic(this, &ThisClass::OnPingTooHigh);
+		}
+	}
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
@@ -248,7 +284,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-		SpendRound();
+	SpendRound();
 }
 
 void AWeapon::Dropped()
