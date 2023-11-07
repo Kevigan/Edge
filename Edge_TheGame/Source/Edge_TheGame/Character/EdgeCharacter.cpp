@@ -448,6 +448,15 @@ void AEdgeCharacter::PlayElimMontage()
 	}
 }
 
+void AEdgeCharacter::PlaySwapMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SwapMontage)
+	{
+		AnimInstance->Montage_Play(SwapMontage);
+	}
+}
+
 void AEdgeCharacter::PlayHitUI()
 {
 	if (!IsLocallyControlled()) return;
@@ -596,6 +605,12 @@ void AEdgeCharacter::MouseWheelTurned()
 	{
 		ServerMouseWheelTurned();
 	}
+	if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+	{
+		PlaySwapMontage();
+		Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+		bFinishSwapping = false;
+	}
 }
 
 void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
@@ -624,7 +639,13 @@ void AEdgeCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		ServerEquipButtonPressed();
+		if(Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
+		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+		{
+			PlaySwapMontage();
+			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			bFinishSwapping = false;
+		}
 	}
 
 }

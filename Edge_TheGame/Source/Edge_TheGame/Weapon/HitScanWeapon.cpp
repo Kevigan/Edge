@@ -115,8 +115,8 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 			BeamEnd = OutHit.ImpactPoint;
 		}
 
-		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Orange, true);
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Hit")));
+		//DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Orange, true);
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("Hit")));
 		if (BeamParticles)
 		{
 			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(

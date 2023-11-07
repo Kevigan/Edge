@@ -75,7 +75,7 @@ void UEdgeAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	bUseFABRIK = EdgeCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	if (EdgeCharacter->IsLocallyControlled())
+	if (EdgeCharacter->IsLocallyControlled() && EdgeCharacter->bFinishSwapping)
 	{
 		bUseFABRIK = !EdgeCharacter->IsLocallyReloading();
 	}

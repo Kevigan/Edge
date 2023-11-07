@@ -22,9 +22,14 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
 	virtual void Destroyed() override;
+
+	/*
+	* Play Montages
+	*/
 	void PlayFireMontage(bool bAiming);
 	void PlayReloadMontage();
 	void PlayElimMontage();
+	void PlaySwapMontage();
 
 	void Elim();
 	UFUNCTION(NetMulticast, Reliable)
@@ -119,6 +124,7 @@ public:
 	UPROPERTY()
 		TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
+		bool bFinishSwapping = false;
 protected:
 	virtual void BeginPlay() override;
 
@@ -237,6 +243,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Config = Combat)
 		class UAnimMontage* ElimMontage = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Config = Combat)
+		class UAnimMontage* SwapMontage = nullptr;
 
 	void HideCameraIfCharacterClose();
 

@@ -85,7 +85,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (CanFire() )
+	if (CanFire())
 	{
 		bCanFire = false;
 
@@ -384,21 +384,17 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapons()
 {
-	if (CombatState != ECombatState::ECS_Unoccupied) return;
-	
+	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr) return;
+
+	Character->PlaySwapMontage();
+	Character->bFinishSwapping = false;
+	CombatState = ECombatState::ECS_SwappingWeapons;
 
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
 
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachActorToRightHand(EquippedWeapon);
-	EquippedWeapon->SetHUDAmmo();
-	UpdateCarriedAmmo();
-	PlayEquippedWeaponSound(EquippedWeapon);
-
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	AttachActorToBackpack(SecondaryWeapon);
+	
 }
 
 void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
@@ -531,6 +527,28 @@ void UCombatComponent::FinishReloading()
 	}
 }
 
+void UCombatComponent::FinishSwap()
+{
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	if (Character) Character->bFinishSwapping = true;
+
+}
+
+void UCombatComponent::FinishSwapAttachWeapons()
+{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToRightHand(EquippedWeapon);
+		EquippedWeapon->SetHUDAmmo();
+		UpdateCarriedAmmo();
+		PlayEquippedWeaponSound(EquippedWeapon);
+
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+		AttachActorToBackpack(SecondaryWeapon);
+}
+
 void UCombatComponent::UpdateAmmoValues()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr) return;
@@ -582,6 +600,14 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading:
 		if (Character && !Character->IsLocallyControlled()) HandleReload();
 		break;
+
+	case ECombatState::ECS_SwappingWeapons:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapMontage();
+		}
+		break;
+
 	case ECombatState::ECS_MAX:
 		break;
 	}
