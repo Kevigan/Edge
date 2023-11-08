@@ -393,8 +393,6 @@ void UCombatComponent::SwapWeapons()
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
-
-	
 }
 
 void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
@@ -539,6 +537,8 @@ void UCombatComponent::FinishSwap()
 
 void UCombatComponent::FinishSwapAttachWeapons()
 {
+	if (EquippedWeapon && SecondaryWeapon)
+	{
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachActorToRightHand(EquippedWeapon);
 		EquippedWeapon->SetHUDAmmo();
@@ -547,6 +547,7 @@ void UCombatComponent::FinishSwapAttachWeapons()
 
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
+	}
 }
 
 void UCombatComponent::UpdateAmmoValues()

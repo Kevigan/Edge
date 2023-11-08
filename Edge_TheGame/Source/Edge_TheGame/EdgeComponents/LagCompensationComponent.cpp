@@ -188,6 +188,7 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 
 	// Enable collision for head first
 	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	if(HeadBox == nullptr) return FServerSideRewindResult{ false, false };
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 

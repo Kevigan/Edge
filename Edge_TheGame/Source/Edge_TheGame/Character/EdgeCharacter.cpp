@@ -176,7 +176,10 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);
 	HideCameraIfCharacterClose();
 	PollInit();
-
+	if (GEngine && Combat)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("CombatState: %s"), Combat->CombatState.ToString()));
+	}
 	if (PlayerIndicatorActor)
 	{
 		PlayerIndicatorActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 1000.f));
@@ -592,8 +595,8 @@ void AEdgeCharacter::LookUp(float Value)
 
 void AEdgeCharacter::MouseWheelTurned()
 {
-	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied) return;
-	if ( Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || !Combat->ShouldSwapWeapons()) return;
+	if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
 	{
 		ShowSniperScopeWidget(true);
 	}
@@ -639,7 +642,7 @@ void AEdgeCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		if(Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
+		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
 		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
 		{
 			PlaySwapMontage();
