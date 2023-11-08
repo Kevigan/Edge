@@ -570,7 +570,7 @@ void UCombatComponent::UpdateAmmoValues()
 
 bool UCombatComponent::ShouldSwapWeapons()
 {
-	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr);
+	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr ||CombatState != ECombatState::ECS_Unoccupied);
 }
 
 int32 UCombatComponent::AmountToReload()

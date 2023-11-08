@@ -178,7 +178,7 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	PollInit();
 	if (GEngine && Combat)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("CombatState: %s"), Combat->CombatState.ToString()));
+		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("CombatState: %s"), *UEnum::GetValueAsString(Combat->CombatState)));
 	}
 	if (PlayerIndicatorActor)
 	{
