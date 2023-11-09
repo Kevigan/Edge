@@ -378,25 +378,27 @@ void UCombatComponent::SwapWeapons()
 	Character->bFinishSwapping = false;
 	CombatState = ECombatState::ECS_SwappingWeapons;
 
-	AWeapon* TempWeapon = EquippedWeapon;
-	EquippedWeapon = SecondaryWeapon;
-	SecondaryWeapon = TempWeapon;
+
 }
 
 void UCombatComponent::FinishSwap()
 {
 	if (Character && Character->HasAuthority())
 	{
+		CombatState = ECombatState::ECS_Unoccupied;
+		ReloadEmptyWeapon();
 	}
-	CombatState = ECombatState::ECS_Unoccupied;
 	if (Character) Character->bFinishSwapping = true;
-	ReloadEmptyWeapon();
 }
 
 void UCombatComponent::FinishSwapAttachWeapons()
 {
 	if (EquippedWeapon && SecondaryWeapon)
 	{
+		AWeapon* TempWeapon = EquippedWeapon;
+		EquippedWeapon = SecondaryWeapon;
+		SecondaryWeapon = TempWeapon;
+
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachActorToRightHand(EquippedWeapon);
 		EquippedWeapon->SetHUDAmmo();
