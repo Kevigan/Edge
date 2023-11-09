@@ -176,13 +176,16 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);
 	HideCameraIfCharacterClose();
 	PollInit();
-
-	if (PlayerIndicatorActor)
+	if (GEngine && Combat && Combat->EquippedWeapon != nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("CombatState: %s"), *UEnum::GetValueAsString(Combat->CombatState)));
+	}
+	if (PlayerIndicatorActor != nullptr)
 	{
 		PlayerIndicatorActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 1000.f));
 
 	}
-	if (MiniMapActor)
+	if (MiniMapActor != nullptr)
 	{
 		MiniMapActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 10000.f));
 		MiniMapActor->SetActorRotation(FRotator(0.f, CameraBoom->GetTargetRotation().Yaw, 0.f));
@@ -341,11 +344,10 @@ void AEdgeCharacter::PlayReloadMontage()
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
 		FName SectionName;
-
 		switch (Combat->EquippedWeapon->GetWeaponType())
 		{
 		case EWeaponType::EWT_AssaulRifle:
-			SectionName = FName("Rifle");
+			SectionName = FName("Riffle");
 			break;
 		case EWeaponType::EWT_Pistol:
 			SectionName = FName("Pistol");
@@ -445,6 +447,15 @@ void AEdgeCharacter::PlayElimMontage()
 	if (AnimInstance && ElimMontage)
 	{
 		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
+void AEdgeCharacter::PlaySwapMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SwapMontage)
+	{
+		AnimInstance->Montage_Play(SwapMontage);
 	}
 }
 
@@ -583,8 +594,8 @@ void AEdgeCharacter::LookUp(float Value)
 
 void AEdgeCharacter::MouseWheelTurned()
 {
-	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied) return;
-	if ( Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || !Combat->ShouldSwapWeapons()) return;
+	if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
 	{
 		ShowSniperScopeWidget(true);
 	}
@@ -595,6 +606,12 @@ void AEdgeCharacter::MouseWheelTurned()
 	if (Combat->ShouldSwapWeapons())
 	{
 		ServerMouseWheelTurned();
+	}
+	if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+	{
+		PlaySwapMontage();
+		Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+		bFinishSwapping = false;
 	}
 }
 
@@ -624,7 +641,13 @@ void AEdgeCharacter::EquipButtonPressed()
 
 	if (Combat)
 	{
-		ServerEquipButtonPressed();
+		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed();
+		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+		{
+			PlaySwapMontage();
+			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			bFinishSwapping = false;
+		}
 	}
 
 }
