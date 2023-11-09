@@ -71,6 +71,11 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
 	}
+	if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped)
+	{
+		GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Red, FString::Printf(TEXT("WeaponState: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponState())));
+		GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Red, FString::Printf(TEXT("WeaponType: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponType())));
+	}
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -104,7 +109,6 @@ void UCombatComponent::Fire()
 			case EFireType::EFT_Shotgun:
 				FireShotgun();
 				break;
-
 			}
 		}
 		StartFireTimer();
@@ -194,6 +198,7 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 	if (EquippedWeapon == nullptr) return;
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
+		//if(EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle) CombatState = ECombatState::ECS_Reloading;
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
 	}
@@ -365,6 +370,44 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	}
 }
 
+void UCombatComponent::SwapWeapons()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr) return;
+
+	Character->PlaySwapMontage();
+	Character->bFinishSwapping = false;
+	CombatState = ECombatState::ECS_SwappingWeapons;
+
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+}
+
+void UCombatComponent::FinishSwap()
+{
+	if (Character && Character->HasAuthority())
+	{
+	}
+	CombatState = ECombatState::ECS_Unoccupied;
+	if (Character) Character->bFinishSwapping = true;
+	ReloadEmptyWeapon();
+}
+
+void UCombatComponent::FinishSwapAttachWeapons()
+{
+	if (EquippedWeapon && SecondaryWeapon)
+	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToRightHand(EquippedWeapon);
+		EquippedWeapon->SetHUDAmmo();
+		UpdateCarriedAmmo();
+		PlayEquippedWeaponSound(EquippedWeapon);
+
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+		AttachActorToBackpack(SecondaryWeapon);
+	}
+}
+
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
@@ -380,19 +423,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
-}
-
-void UCombatComponent::SwapWeapons()
-{
-	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr) return;
-
-	Character->PlaySwapMontage();
-	Character->bFinishSwapping = false;
-	CombatState = ECombatState::ECS_SwappingWeapons;
-
-	AWeapon* TempWeapon = EquippedWeapon;
-	EquippedWeapon = SecondaryWeapon;
-	SecondaryWeapon = TempWeapon;
 }
 
 void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
@@ -485,6 +515,7 @@ void UCombatComponent::PlayEquippedWeaponSound(AWeapon* WeaponToEquip)
 
 void UCombatComponent::ReloadEmptyWeapon()
 {
+
 	if (EquippedWeapon && EquippedWeapon->IsEmpty())
 	{
 		Reload();
@@ -493,11 +524,17 @@ void UCombatComponent::ReloadEmptyWeapon()
 
 void UCombatComponent::Reload()
 {
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("Local reload")));
+	}
 	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && !bLocallyReloading)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("reload")));
 		ServerReload();
 		HandleReload();
 		bLocallyReloading = true;
+
 	}
 }
 
@@ -506,7 +543,10 @@ void UCombatComponent::ServerReload_Implementation()
 	if (Character == nullptr || EquippedWeapon == nullptr) return;
 
 	CombatState = ECombatState::ECS_Reloading;
-	if (!Character->IsLocallyControlled()) HandleReload();
+	if (!Character->IsLocallyControlled())
+	{
+		HandleReload();
+	}
 }
 
 void UCombatComponent::FinishReloading()
@@ -525,28 +565,12 @@ void UCombatComponent::FinishReloading()
 	}
 }
 
-void UCombatComponent::FinishSwap()
+void UCombatComponent::HandleReload()
 {
-	if (Character && Character->HasAuthority())
+	if (Character)
 	{
-		CombatState = ECombatState::ECS_Unoccupied;
-	}
-	if (Character) Character->bFinishSwapping = true;
+		Character->PlayReloadMontage();
 
-}
-
-void UCombatComponent::FinishSwapAttachWeapons()
-{
-	if (EquippedWeapon && SecondaryWeapon)
-	{
-		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-		AttachActorToRightHand(EquippedWeapon);
-		EquippedWeapon->SetHUDAmmo();
-		UpdateCarriedAmmo();
-		PlayEquippedWeaponSound(EquippedWeapon);
-
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-		AttachActorToBackpack(SecondaryWeapon);
 	}
 }
 
@@ -570,7 +594,7 @@ void UCombatComponent::UpdateAmmoValues()
 
 bool UCombatComponent::ShouldSwapWeapons()
 {
-	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr ||CombatState != ECombatState::ECS_Unoccupied);
+	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr || CombatState != ECombatState::ECS_Unoccupied);
 }
 
 int32 UCombatComponent::AmountToReload()
@@ -611,14 +635,6 @@ void UCombatComponent::OnRep_CombatState()
 
 	case ECombatState::ECS_MAX:
 		break;
-	}
-}
-
-void UCombatComponent::HandleReload()
-{
-	if (Character)
-	{
-		Character->PlayReloadMontage();
 	}
 }
 

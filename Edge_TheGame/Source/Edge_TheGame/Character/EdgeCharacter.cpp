@@ -176,16 +176,16 @@ void AEdgeCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);
 	HideCameraIfCharacterClose();
 	PollInit();
-	if (GEngine && Combat)
+	if (GEngine && Combat && Combat->EquippedWeapon != nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Red, FString::Printf(TEXT("CombatState: %s"), *UEnum::GetValueAsString(Combat->CombatState)));
 	}
-	if (PlayerIndicatorActor)
+	if (PlayerIndicatorActor != nullptr)
 	{
 		PlayerIndicatorActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 1000.f));
 
 	}
-	if (MiniMapActor)
+	if (MiniMapActor != nullptr)
 	{
 		MiniMapActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 10000.f));
 		MiniMapActor->SetActorRotation(FRotator(0.f, CameraBoom->GetTargetRotation().Yaw, 0.f));
@@ -344,11 +344,10 @@ void AEdgeCharacter::PlayReloadMontage()
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
 		FName SectionName;
-
 		switch (Combat->EquippedWeapon->GetWeaponType())
 		{
 		case EWeaponType::EWT_AssaulRifle:
-			SectionName = FName("Rifle");
+			SectionName = FName("Riffle");
 			break;
 		case EWeaponType::EWT_Pistol:
 			SectionName = FName("Pistol");
