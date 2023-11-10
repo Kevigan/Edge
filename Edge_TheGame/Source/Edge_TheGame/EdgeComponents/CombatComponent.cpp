@@ -71,10 +71,34 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
 	}
-	if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped)
+	if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped && Character && Character->IsLocallyControlled() && !Character->HasAuthority())
 	{
-		GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Red, FString::Printf(TEXT("WeaponState: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponState())));
-		GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Red, FString::Printf(TEXT("WeaponType: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponType())));
+		GEngine->AddOnScreenDebugMessage(0, 2.f, FColor::Blue, FString::Printf(TEXT("ClientCombatState: %s"), *UEnum::GetValueAsString(CombatState)));
+		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Blue, FString::Printf(TEXT("ClientWeaponState: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponState())));
+		GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Blue, FString::Printf(TEXT("ClientWeaponType: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponType())));
+		GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("ClientAmmo: %d"), EquippedWeapon->GetAmmo()));
+		GEngine->AddOnScreenDebugMessage(4, 2.f, FColor::Blue, FString::Printf(TEXT("ClientJustFired: %d"), Character->bJustFired));
+		if (SecondaryWeapon != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(5, 2.f, FColor::Blue, FString::Printf(TEXT("ClientSecondaryWeaponState: %s"), *UEnum::GetValueAsString(SecondaryWeapon->GetWeaponState())));
+			GEngine->AddOnScreenDebugMessage(6, 2.f, FColor::Blue, FString::Printf(TEXT("ClientSecondaryWeaponType: %s"), *UEnum::GetValueAsString(SecondaryWeapon->GetWeaponType())));
+			GEngine->AddOnScreenDebugMessage(7, 2.f, FColor::Blue, FString::Printf(TEXT("ClientSecondaryAmmo: %d"), SecondaryWeapon->GetAmmo()));
+		}
+
+	}
+	if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped && Character && Character->HasAuthority() && !Character->IsLocallyControlled())
+	{
+		GEngine->AddOnScreenDebugMessage(8, 2.f, FColor::Red, FString::Printf(TEXT("ServerCombatState: %s"), *UEnum::GetValueAsString(CombatState)));
+		GEngine->AddOnScreenDebugMessage(9, 2.f, FColor::Red, FString::Printf(TEXT("ServerWeaponState: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponState())));
+		GEngine->AddOnScreenDebugMessage(10, 2.f, FColor::Red, FString::Printf(TEXT("ServerWeaponType: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponType())));
+		GEngine->AddOnScreenDebugMessage(11, 2.f, FColor::Red, FString::Printf(TEXT("ServerAmmo: %d"), EquippedWeapon->GetAmmo()));
+		GEngine->AddOnScreenDebugMessage(12, 2.f, FColor::Red, FString::Printf(TEXT("ClientJustFired: %d"), Character->bJustFired));
+		if (SecondaryWeapon != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(13, 2.f, FColor::Red, FString::Printf(TEXT("ServerSecondaryWeaponState: %s"), *UEnum::GetValueAsString(SecondaryWeapon->GetWeaponState())));
+			GEngine->AddOnScreenDebugMessage(14, 2.f, FColor::Red, FString::Printf(TEXT("ServerSecondaryWeaponType: %s"), *UEnum::GetValueAsString(SecondaryWeapon->GetWeaponType())));
+			GEngine->AddOnScreenDebugMessage(15, 2.f, FColor::Red, FString::Printf(TEXT("ServerSecondaryAmmo: %d"), SecondaryWeapon->GetAmmo()));
+		}
 	}
 }
 
@@ -169,6 +193,7 @@ void UCombatComponent::FireTimerFinished()
 		Fire();
 	}
 	ReloadEmptyWeapon();
+	
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget) //called from server or client, executed on server only
@@ -178,6 +203,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)// called from server, executed on server and clients
 {
+	if (Character && !Character->HasAuthority()) Character->ServerResetJustFired();
 	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;
 	LocalFire(TraceHitTarget);
 }
@@ -372,13 +398,11 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 
 void UCombatComponent::SwapWeapons()
 {
-	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr) return;
+	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr || !Character->HasAuthority()) return;
 
 	Character->PlaySwapMontage();
-	Character->bFinishSwapping = false;
 	CombatState = ECombatState::ECS_SwappingWeapons;
-
-
+	Character->bFinishSwapping = false;
 }
 
 void UCombatComponent::FinishSwap()
@@ -386,7 +410,7 @@ void UCombatComponent::FinishSwap()
 	if (Character && Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
-		ReloadEmptyWeapon();
+		//ReloadEmptyWeapon();
 	}
 	if (Character) Character->bFinishSwapping = true;
 }
@@ -517,7 +541,6 @@ void UCombatComponent::PlayEquippedWeaponSound(AWeapon* WeaponToEquip)
 
 void UCombatComponent::ReloadEmptyWeapon()
 {
-
 	if (EquippedWeapon && EquippedWeapon->IsEmpty())
 	{
 		Reload();
@@ -528,11 +551,11 @@ void UCombatComponent::Reload()
 {
 	if (CombatState != ECombatState::ECS_Unoccupied)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("Local reload")));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("Local reload")));
 	}
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && !bLocallyReloading)
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull() && !bLocallyReloading)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("reload")));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("reload")));
 		ServerReload();
 		HandleReload();
 		bLocallyReloading = true;
@@ -596,7 +619,7 @@ void UCombatComponent::UpdateAmmoValues()
 
 bool UCombatComponent::ShouldSwapWeapons()
 {
-	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr || CombatState != ECombatState::ECS_Unoccupied);
+	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr);
 }
 
 int32 UCombatComponent::AmountToReload()

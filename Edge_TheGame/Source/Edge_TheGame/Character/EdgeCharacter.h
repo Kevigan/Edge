@@ -124,7 +124,21 @@ public:
 	UPROPERTY()
 		TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
-		bool bFinishSwapping = false;
+	bool bFinishSwapping = false;
+	bool bJustFired = false;
+
+	UFUNCTION(Server, Reliable)
+		void ServersetJustFired();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MultisetJustFired();
+
+	UFUNCTION(Server, Reliable)
+		void ServerResetJustFired();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MultiResetJustFired();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -215,7 +229,7 @@ private:
 		class UCombatComponent* Combat = nullptr;
 
 	UFUNCTION(Server, Reliable)
-		void ServerEquipButtonPressed();
+		void ServerEquipButtonPressed(AWeapon* OverlappedWeapon);
 
 	UFUNCTION(Server, Reliable)
 		void ServerMouseWheelTurned();
@@ -317,7 +331,7 @@ public:
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
-	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const {return LagCompensation;}
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 	UFUNCTION(BlueprintCallable)
 		AEdge_HUD* GetEdgeHUD() { return HUD; }
 
