@@ -131,6 +131,11 @@ public:
 	void StartFireTimer();
 	void FireTimerFinished();
 
+	bool bJustEquipped = false;
+	FTimerHandle EquipTimerFire;
+	void StartEquipTimer();
+	void EquipTimerFinished();
+
 	UFUNCTION(Server, Reliable)
 		void ServersetJustFired();
 

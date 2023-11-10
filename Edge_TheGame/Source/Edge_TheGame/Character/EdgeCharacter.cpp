@@ -671,15 +671,22 @@ void AEdgeCharacter::EquipButtonPressed()
 	{
 		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
 		{
-			ServerEquipButtonPressed(OverlappingWeapon);
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("Klo")));
 			bJustFired = true;
 			StartFireTimer();
+			bJustEquipped = true;
+			StartEquipTimer();
+			ServerEquipButtonPressed(OverlappingWeapon);
 		}
 
 		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
 		{
-			PlaySwapMontage();
+			bJustFired = true;
+			StartFireTimer();
+			
+			bFireButtonPressed = true;
 			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			PlaySwapMontage();
 		}
 	}
 
@@ -691,7 +698,10 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation(AWeapon* Overlapped
 	{
 		if (OverlappedWeapon)
 		{
-			bFireButtonPressed = true;
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("Klo22")));
+			bJustFired = true;
+			StartFireTimer();
+			
 			Combat->EquipWeapon(OverlappedWeapon);
 		}
 		else if (Combat->ShouldSwapWeapons()) // Make new funtion for using mouse wheel
@@ -852,7 +862,7 @@ void AEdgeCharacter::Jump()
 void AEdgeCharacter::FireButtonPressed()
 {
 	if (bDisableGameplay) return;
-	if (Combat && Combat->EquippedWeapon)
+	if (Combat && Combat->EquippedWeapon && !bJustEquipped)
 	{
 		bFireButtonPressed = true;
 		Combat->FireButtonPressed(true);
@@ -883,6 +893,21 @@ void AEdgeCharacter::FireTimerFinished()
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString(TEXT("HIHO")));
 	}
 	else StartFireTimer();
+}
+
+void AEdgeCharacter::StartEquipTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		EquipTimerFire,
+		this,
+		&AEdgeCharacter::EquipTimerFinished,
+		1.f
+	);
+}
+
+void AEdgeCharacter::EquipTimerFinished()
+{
+	bJustEquipped = false;
 }
 
 void AEdgeCharacter::FireButtonReleased()
