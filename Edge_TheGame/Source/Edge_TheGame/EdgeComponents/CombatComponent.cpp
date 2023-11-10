@@ -71,7 +71,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
 	}
-	if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped && Character && Character->IsLocallyControlled() && !Character->HasAuthority())
+	/*if (EquippedWeapon && EquippedWeapon->GetWeaponState() == EWeaponState::EWS_Equipped && Character && Character->IsLocallyControlled() && !Character->HasAuthority())
 	{
 		GEngine->AddOnScreenDebugMessage(0, 2.f, FColor::Blue, FString::Printf(TEXT("ClientCombatState: %s"), *UEnum::GetValueAsString(CombatState)));
 		GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Blue, FString::Printf(TEXT("ClientWeaponState: %s"), *UEnum::GetValueAsString(EquippedWeapon->GetWeaponState())));
@@ -99,7 +99,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 			GEngine->AddOnScreenDebugMessage(14, 2.f, FColor::Red, FString::Printf(TEXT("ServerSecondaryWeaponType: %s"), *UEnum::GetValueAsString(SecondaryWeapon->GetWeaponType())));
 			GEngine->AddOnScreenDebugMessage(15, 2.f, FColor::Red, FString::Printf(TEXT("ServerSecondaryAmmo: %d"), SecondaryWeapon->GetAmmo()));
 		}
-	}
+	}*/
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -193,7 +193,7 @@ void UCombatComponent::FireTimerFinished()
 		Fire();
 	}
 	ReloadEmptyWeapon();
-	
+
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget) //called from server or client, executed on server only
@@ -203,7 +203,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)// called from server, executed on server and clients
 {
-	if (Character && !Character->HasAuthority()) Character->ServerResetJustFired();
+	//if (Character && !Character->HasAuthority()) Character->ServerResetJustFired();
 	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority()) return;
 	LocalFire(TraceHitTarget);
 }

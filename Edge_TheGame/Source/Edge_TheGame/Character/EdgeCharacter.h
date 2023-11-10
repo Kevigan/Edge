@@ -126,6 +126,10 @@ public:
 
 	bool bFinishSwapping = false;
 	bool bJustFired = false;
+	bool bFireButtonPressed = false;
+	FTimerHandle FireTimerFirePressed;
+	void StartFireTimer();
+	void FireTimerFinished();
 
 	UFUNCTION(Server, Reliable)
 		void ServersetJustFired();

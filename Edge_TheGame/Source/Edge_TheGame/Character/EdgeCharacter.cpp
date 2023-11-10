@@ -187,6 +187,11 @@ void AEdgeCharacter::Tick(float DeltaTime)
 		MiniMapActor->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 10000.f));
 		MiniMapActor->SetActorRotation(FRotator(0.f, CameraBoom->GetTargetRotation().Yaw, 0.f));
 	}
+	if (EdgePlayerController)
+	{
+		//GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Blue, FString::Printf(TEXT("RTT TIme: %f"), EdgePlayerController->GetServerTime() - EdgePlayerController->SingleTripTime));
+	}
+
 }
 
 void AEdgeCharacter::RotateInPlace(float DeltaTime)
@@ -226,7 +231,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ThisClass::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ThisClass::FireButtonReleased);
 	PlayerInputComponent->BindAction("ESC", IE_Pressed, this, &ThisClass::EscapeButtonPressed);
-	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
+	//PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Pressed, this, &ThisClass::TabButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
@@ -649,8 +654,8 @@ void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 
 void AEdgeCharacter::EquipButtonPressed()
 {
-	if (bDisableGameplay || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired) return;
-	if (Combat && Combat->ShouldSwapWeapons())
+	if (bDisableGameplay || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired || bFireButtonPressed) return;
+	/*if (Combat && Combat->ShouldSwapWeapons())
 	{
 		if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
 		{
@@ -660,16 +665,21 @@ void AEdgeCharacter::EquipButtonPressed()
 		{
 			ShowSniperScopeWidget(false);
 		}
-	}
+	}*/
 
 	if (Combat)
 	{
-		if (Combat->CombatState == ECombatState::ECS_Unoccupied) ServerEquipButtonPressed(OverlappingWeapon);
+		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
+		{
+			ServerEquipButtonPressed(OverlappingWeapon);
+			bJustFired = true;
+			StartFireTimer();
+		}
+
 		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
 		{
 			PlaySwapMontage();
 			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
-			bFinishSwapping = false;
 		}
 	}
 
@@ -679,14 +689,13 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation(AWeapon* Overlapped
 {
 	if (Combat)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString(TEXT("Jiiiin")));
 		if (OverlappedWeapon)
 		{
+			bFireButtonPressed = true;
 			Combat->EquipWeapon(OverlappedWeapon);
 		}
 		else if (Combat->ShouldSwapWeapons()) // Make new funtion for using mouse wheel
 		{
-
 			Combat->SwapWeapons();
 		}
 	}
@@ -845,13 +854,35 @@ void AEdgeCharacter::FireButtonPressed()
 	if (bDisableGameplay) return;
 	if (Combat && Combat->EquippedWeapon)
 	{
+		bFireButtonPressed = true;
 		Combat->FireButtonPressed(true);
-		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
+		bJustFired = true;
+
+		/*if (Combat->CombatState == ECombatState::ECS_Unoccupied)
 		{
-			bJustFired = true;
 			ServersetJustFired();
-		}
+		}*/
 	}
+}
+
+void AEdgeCharacter::StartFireTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		FireTimerFirePressed,
+		this,
+		&AEdgeCharacter::FireTimerFinished,
+		1.f
+	);
+}
+
+void AEdgeCharacter::FireTimerFinished()
+{
+	if (!bFireButtonPressed)
+	{
+		bJustFired = false;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString(TEXT("HIHO")));
+	}
+	else StartFireTimer();
 }
 
 void AEdgeCharacter::FireButtonReleased()
@@ -859,6 +890,8 @@ void AEdgeCharacter::FireButtonReleased()
 	if (bDisableGameplay) return;
 	if (Combat)
 	{
+		StartFireTimer();
+		bFireButtonPressed = false;
 		Combat->FireButtonPressed(false);
 	}
 }
