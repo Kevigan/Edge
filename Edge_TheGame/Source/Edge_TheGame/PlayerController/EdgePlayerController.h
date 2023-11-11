@@ -33,7 +33,6 @@ public:
 	void OnMatchStateSet(FName State);
 	void HandleMatchHasStarted();
 	void HandleCooldown();
-	void OpenMenu();
 	void ShowTeamData();
 	bool MenuOpen = false;
 	bool TeamDataOpen = false;
@@ -45,6 +44,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void SetupInputComponent() override;
+
 	void SetHUDTime();
 	void PollInit();
 
@@ -78,12 +79,27 @@ protected:
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
 
+	void ShowGameMenu();
+
+
 private:
 	UPROPERTY()
 		class AEdge_HUD* EdgeHUD = nullptr;
 
 	UPROPERTY()
 		class AEdgeGameMode* EdgeGameMode = nullptr;
+
+	/*
+	* Open Game Menu
+	*/
+	UPROPERTY(EditAnywhere, Category = Config = HUD)
+		TSubclassOf<class UUserWidget> GameMenuWidget;
+
+	UPROPERTY()
+		class UGameMenu* GameMenu;
+
+	bool bGameMenuOpen = false;
+
 
 	float levelStartingTime = 0.f;
 	float MatchTime = 0.f;

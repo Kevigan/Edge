@@ -80,8 +80,7 @@ public:
 	void AddAnnouncement();
 	void AddMiniMap();
 	void AddKillText();
-	void AddMenu();
-	void RemoveMenu();
+	
 	void SetEnemyKilledText(const FString& EnemyName);
 	void AddTeamDataWidget();
 	void RemoveTeamDataWidget();

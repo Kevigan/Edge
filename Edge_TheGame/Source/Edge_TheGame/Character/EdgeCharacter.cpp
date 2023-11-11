@@ -230,8 +230,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ThisClass::AimButtonReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ThisClass::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ThisClass::FireButtonReleased);
-	PlayerInputComponent->BindAction("ESC", IE_Pressed, this, &ThisClass::EscapeButtonPressed);
-	//PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
+	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Pressed, this, &ThisClass::TabButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
@@ -594,52 +593,36 @@ void AEdgeCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
-void AEdgeCharacter::ServersetJustFired_Implementation()
-{
-	if (HasAuthority() && !IsLocallyControlled()) bJustFired = true;
-	MultisetJustFired();
-}
-
-void AEdgeCharacter::MultisetJustFired_Implementation()
-{
-	if (HasAuthority()) return;
-	bJustFired = true;
-}
-
-void AEdgeCharacter::ServerResetJustFired_Implementation()
-{
-	if (HasAuthority()) bJustFired = false;
-	MultiResetJustFired();
-}
-
-void AEdgeCharacter::MultiResetJustFired_Implementation()
-{
-	if (!HasAuthority())
-	{
-		bJustFired = false;
-	}
-}
-
 void AEdgeCharacter::MouseWheelTurned()
 {
-	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || !Combat->ShouldSwapWeapons() || bJustFired) return;
-	if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired || bFireButtonPressed) return;
+	if (Combat && Combat->ShouldSwapWeapons())
 	{
-		ShowSniperScopeWidget(true);
+		if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+		{
+			ShowSniperScopeWidget(true);
+		}
+		else if (Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->SecondaryWeapon->GetWeaponType() != EWeaponType::EWT_SniperRifle && Combat->bAiming)
+		{
+			ShowSniperScopeWidget(false);
+		}
 	}
-	else if (Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->SecondaryWeapon->GetWeaponType() != EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	if (Combat->CombatState == ECombatState::ECS_Unoccupied)
 	{
-		ShowSniperScopeWidget(false);
-	}
-	if (Combat->ShouldSwapWeapons())
-	{
+		bJustFired = true;
+		StartFireTimer();
+		bJustEquipped = true;
+		StartEquipTimer();
 		ServerMouseWheelTurned();
 	}
-	if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+	if (Combat->ShouldSwapWeapons() && !HasAuthority())
 	{
-		PlaySwapMontage();
+		bJustFired = true;
+		StartFireTimer();
+
 		Combat->CombatState = ECombatState::ECS_SwappingWeapons;
-		bFinishSwapping = false;
+		bFinishSwapping = false; //////TESTING
+		PlaySwapMontage();
 	}
 }
 
@@ -654,8 +637,8 @@ void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 
 void AEdgeCharacter::EquipButtonPressed()
 {
-	if (bDisableGameplay || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired || bFireButtonPressed) return;
-	/*if (Combat && Combat->ShouldSwapWeapons())
+	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired || bFireButtonPressed) return;
+	if (Combat && Combat->ShouldSwapWeapons())
 	{
 		if (Combat->SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
 		{
@@ -665,31 +648,26 @@ void AEdgeCharacter::EquipButtonPressed()
 		{
 			ShowSniperScopeWidget(false);
 		}
-	}*/
-
-	if (Combat)
-	{
-		if (Combat->CombatState == ECombatState::ECS_Unoccupied)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("Klo")));
-			bJustFired = true;
-			StartFireTimer();
-			bJustEquipped = true;
-			StartEquipTimer();
-			ServerEquipButtonPressed(OverlappingWeapon);
-		}
-
-		if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
-		{
-			bJustFired = true;
-			StartFireTimer();
-			
-			bFireButtonPressed = true;
-			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
-			PlaySwapMontage();
-		}
 	}
 
+	if (Combat->CombatState == ECombatState::ECS_Unoccupied)
+	{
+		bJustFired = true;
+		StartFireTimer();
+		bJustEquipped = true;
+		StartEquipTimer();
+		ServerEquipButtonPressed(OverlappingWeapon);
+	}
+
+	if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
+	{
+		bJustFired = true;
+		StartFireTimer();
+
+		Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+		bFinishSwapping = false; //////TESTING
+		PlaySwapMontage();
+	}
 }
 
 void AEdgeCharacter::ServerEquipButtonPressed_Implementation(AWeapon* OverlappedWeapon)
@@ -698,10 +676,9 @@ void AEdgeCharacter::ServerEquipButtonPressed_Implementation(AWeapon* Overlapped
 	{
 		if (OverlappedWeapon)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("Klo22")));
 			bJustFired = true;
 			StartFireTimer();
-			
+
 			Combat->EquipWeapon(OverlappedWeapon);
 		}
 		else if (Combat->ShouldSwapWeapons()) // Make new funtion for using mouse wheel
@@ -890,7 +867,6 @@ void AEdgeCharacter::FireTimerFinished()
 	if (!bFireButtonPressed)
 	{
 		bJustFired = false;
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString(TEXT("HIHO")));
 	}
 	else StartFireTimer();
 }
@@ -918,16 +894,6 @@ void AEdgeCharacter::FireButtonReleased()
 		StartFireTimer();
 		bFireButtonPressed = false;
 		Combat->FireButtonPressed(false);
-	}
-}
-
-void AEdgeCharacter::EscapeButtonPressed()
-{
-	EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
-	if (EdgePlayerController)
-	{
-		EdgePlayerController->OpenMenu();
-
 	}
 }
 

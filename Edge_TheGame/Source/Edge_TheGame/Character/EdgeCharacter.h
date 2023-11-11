@@ -136,18 +136,6 @@ public:
 	void StartEquipTimer();
 	void EquipTimerFinished();
 
-	UFUNCTION(Server, Reliable)
-		void ServersetJustFired();
-
-	UFUNCTION(NetMulticast, Reliable)
-		void MultisetJustFired();
-
-	UFUNCTION(Server, Reliable)
-		void ServerResetJustFired();
-
-	UFUNCTION(NetMulticast, Reliable)
-		void MultiResetJustFired();
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -168,7 +156,6 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
-	void EscapeButtonPressed();
 	void UpdateHUDHealth();
 	void UpdateHUDAmmo();
 	void PlayHitUI();

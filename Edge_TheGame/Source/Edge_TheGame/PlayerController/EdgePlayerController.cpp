@@ -15,6 +15,7 @@
 #include "Edge_TheGame/GameState/EdgeGameState.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 #include "Components/Image.h"
+#include "Edge_TheGame/HUD/GameMenu.h"
 
 void AEdgePlayerController::BeginPlay()
 {
@@ -29,6 +30,14 @@ void AEdgePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AEdgePlayerController, MatchState);
+}
+
+void AEdgePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	if (InputComponent == nullptr) return;
+
+	InputComponent->BindAction("ESC", IE_Pressed, this, &ThisClass::ShowGameMenu);
 }
 
 void AEdgePlayerController::Tick(float DeltaTime)
@@ -75,6 +84,28 @@ void AEdgePlayerController::CheckPing(float DeltaTime)
 			StopHighPingWarning();
 		}
 	}
+}
+
+void AEdgePlayerController::ShowGameMenu()
+{
+	if (GameMenuWidget == nullptr) return;
+	if (GameMenu == nullptr)
+	{
+		GameMenu = CreateWidget<UGameMenu>(this, GameMenuWidget);
+	}
+	if (GameMenu)
+	{
+		bGameMenuOpen = !bGameMenuOpen;
+		if (bGameMenuOpen)
+		{
+			GameMenu->MenuSetup();
+		}
+		else
+		{
+			GameMenu->MenuTearDown();
+		}
+	}
+
 }
 
 //Is the ping too high?
@@ -166,7 +197,7 @@ void AEdgePlayerController::SetHUDHealth(float Health, float MaxHealth)
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 
 	bool bHUDValid = EdgeHUD && EdgeHUD->CharacterOverlay && EdgeHUD->CharacterOverlay->HealthBar && EdgeHUD->CharacterOverlay->HealthText;
-	
+
 	if (bHUDValid)
 	{
 		const float HealthPercent = Health / MaxHealth;
@@ -467,21 +498,6 @@ void AEdgePlayerController::HandleCooldown()
 	{
 		EdgeCharacter->bDisableGameplay = true;
 		EdgeCharacter->GetCombat()->FireButtonPressed(false);
-	}
-}
-
-void AEdgePlayerController::OpenMenu()
-{
-	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
-	if (EdgeHUD && !MenuOpen)
-	{
-		EdgeHUD->AddMenu();
-		MenuOpen = true;
-	}
-	else if (EdgeHUD && MenuOpen)
-	{
-		EdgeHUD->RemoveMenu();
-		MenuOpen = false;
 	}
 }
 
