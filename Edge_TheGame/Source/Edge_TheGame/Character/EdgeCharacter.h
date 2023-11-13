@@ -7,6 +7,7 @@
 #include "Edge_TheGame/EdgeTypes/TurningInPlace.h"
 #include "Edge_TheGame/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Edge_TheGame/EdgeTypes/CombatState.h"
+#include "Edge_TheGame/EdgeTypes/Team.h"
 #include "EdgeCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
@@ -50,11 +51,6 @@ public:
 
 	FTimerHandle CrosshairTimer;
 	void CrosshairTimerFinished();
-
-	void AddKillText(AEdgeCharacter* EdgeCharacter);
-
-	UFUNCTION(Client, Reliable)
-		void ClientAddKillText(AEdgeCharacter* EdgeCharacter);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void ShowSniperScopeWidget(bool bShowScope);
@@ -141,6 +137,8 @@ public:
 		void ServerLeaveGame();
 
 	FOnLeftGame OnLeftGame;
+
+	void SetTeamColor(ETeam Team);
 
 protected:
 	virtual void BeginPlay() override;
@@ -302,7 +300,7 @@ private:
 
 	bool bLeftGame = false;
 
-	
+
 
 
 	// Poll for any relevant classes and initialize our HUD
@@ -320,6 +318,22 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<AWeapon> DefaultWeaponClass;
 
+
+	/*
+	* Team Colors
+	*/
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		UMaterialInstance* RedTeamMat;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		UMaterialInstance* BlueTeamMat;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		UMaterialInstance* NoTeamMat;
+
+	UPROPERTY(EditAnywhere)
+	class AEdgeGameMode* EdgeGameMode;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

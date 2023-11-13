@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Edge_TheGame/EdgeTypes/Team.h"
 #include "EdgePlayerState.generated.h"
 
 /**
@@ -34,4 +35,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Death)
 		int32 Death;
 
+	UPROPERTY(ReplicatedUsing = OnRep_Team)
+		ETeam Team = ETeam::ET_NoTeam;
+
+	UFUNCTION()
+		void OnRep_Team();
+
+public:
+	FORCEINLINE ETeam GetTeam() const { return Team; }
+	void SetTeam(ETeam TeamToSet);
 };

@@ -43,9 +43,6 @@ public:
 		TSubclassOf<class UUserWidget> MiniMapOverlayClass;
 
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
-		TSubclassOf< UUserWidget> KillTextOverlayClass;
-
-	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
 		TSubclassOf< UUserWidget> AnnouncementClass;
 
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
@@ -64,9 +61,6 @@ public:
 		UUserWidget* MiniMapOverlay = nullptr;
 
 	UPROPERTY()
-		UUserWidget* KillTextOverlay = nullptr;
-
-	UPROPERTY()
 		UMenuWidget* MenuWidgetOverlay = nullptr;
 
 	UPROPERTY()
@@ -83,9 +77,7 @@ public:
 	void AddAnnouncement();
 	void AddElimAnnouncement(FString Attacker, FString Victim);
 	void AddMiniMap();
-	void AddKillText();
-
-	void SetEnemyKilledText(const FString& EnemyName);
+	
 	void AddTeamDataWidget();
 	void RemoveTeamDataWidget();
 

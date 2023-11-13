@@ -11,6 +11,7 @@ void AEdgePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AEdgePlayerState, Death);
+	DOREPLIFETIME(AEdgePlayerState, Team);
 }
 
 void AEdgePlayerState::AddToScore(float ScoreAmount)
@@ -53,6 +54,26 @@ void AEdgePlayerState::AddToDeath(int32 DeathsAmount)
 		{
 			Controller->SetHUDDeath(Death);
 		}
+	}
+}
+
+void AEdgePlayerState::SetTeam(ETeam TeamToSet)
+{
+	Team = TeamToSet;
+
+	AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(GetPawn());
+	if (EdgeCharacter)
+	{
+		EdgeCharacter->SetTeamColor(Team);
+	}
+}
+
+void AEdgePlayerState::OnRep_Team()
+{
+	AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(GetPawn());
+	if (EdgeCharacter)
+	{
+		EdgeCharacter->SetTeamColor(Team);
 	}
 }
 

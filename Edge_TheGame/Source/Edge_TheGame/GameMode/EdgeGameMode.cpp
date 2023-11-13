@@ -81,6 +81,11 @@ void AEdgeGameMode::OnMatchStateSet()
 	}
 }
 
+float AEdgeGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	return BaseDamage;
+}
+
 void AEdgeGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlayerController* VictimController, AEdgePlayerController* AttackerContoller)
 {
 	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) : nullptr;
@@ -143,5 +148,6 @@ void AEdgeGameMode::PlayerLeftGame(AEdgePlayerState* PlayerLeaving)
 		CharacterLeaving->Elim(true);
 	}
 }
+
 
 

@@ -194,6 +194,23 @@ void AEdgeCharacter::Tick(float DeltaTime)
 
 }
 
+void AEdgeCharacter::SetTeamColor(ETeam Team)
+{
+	if (GetMesh() == nullptr || NoTeamMat == nullptr) return;
+	switch (Team)
+	{
+	case ETeam::ET_NoTeam:
+		GetMesh()->SetMaterial(0,NoTeamMat);
+		break;
+	case ETeam::ET_BlueTeam:
+		GetMesh()->SetMaterial(0, BlueTeamMat);
+		break;
+	case ETeam::ET_RedTeam:
+		GetMesh()->SetMaterial(0, RedTeamMat);
+		break;
+	}
+}
+
 void AEdgeCharacter::RotateInPlace(float DeltaTime)
 {
 	if (bDisableGameplay)
@@ -267,6 +284,10 @@ void AEdgeCharacter::OnRep_ReplicatedMovement()
 
 void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
+	if (bElimmed || EdgeGameMode == nullptr) return;
+	Damage = EdgeGameMode->CalculateDamage(InstigatorController, Controller, Damage);
+
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitUI();
@@ -292,7 +313,6 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 	}
 	if (Health == 0.f)
 	{
-		AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
 		if (EdgeGameMode)
 		{
 			EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
@@ -309,12 +329,10 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 					if (!EdgeCharacterEnemy->IsLocallyControlled())
 					{
 						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->ClientAddKillText(this);
 					}
 					else
 					{
 						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
-						EdgeCharacterEnemy->AddKillText(this);
 					}
 				}
 			}
@@ -368,7 +386,7 @@ void AEdgeCharacter::Elim(bool bPlayerLeftGame)
 {
 	DropOrDestroyWeapons();
 	MulticastElim(bPlayerLeftGame);
-	
+
 }
 
 void AEdgeCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
@@ -409,7 +427,7 @@ void AEdgeCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 
 void AEdgeCharacter::ElimTimerFinished()
 {
-	AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
 	if (EdgeGameMode && !bLeftGame)
 	{
 		EdgeGameMode->RequestRespawn(this, Controller);
@@ -422,7 +440,7 @@ void AEdgeCharacter::ElimTimerFinished()
 
 void AEdgeCharacter::ServerLeaveGame_Implementation()
 {
-	AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
 	EdgePlayerState = EdgePlayerState == nullptr ? GetPlayerState<AEdgePlayerState>() : EdgePlayerState;
 	if (EdgeGameMode && EdgePlayerState)
 	{
@@ -522,7 +540,7 @@ void AEdgeCharacter::SpawnMiniMap()
 			FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 10000.f),
 			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
-		);
+			);
 		if (MiniMapActor)
 		{
 			//MiniMapActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
@@ -546,7 +564,7 @@ void AEdgeCharacter::SpawnMiniMap()
 			GetActorLocation(),
 			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
-		);
+			);
 		if (PlayerIndicatorActor)
 		{
 			//PlayerIndicatorActor->Owner = this;
@@ -946,6 +964,10 @@ void AEdgeCharacter::HideCameraIfCharacterClose()
 		{
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
+		if (Combat && Combat->SecondaryWeapon && Combat->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
 	}
 	else
 	{
@@ -953,6 +975,10 @@ void AEdgeCharacter::HideCameraIfCharacterClose()
 		if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
 		{
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+		if (Combat && Combat->SecondaryWeapon && Combat->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
@@ -991,6 +1017,7 @@ void AEdgeCharacter::PollInit()
 		{
 			EdgePlayerState->AddToScore(0.f);
 			EdgePlayerState->AddToDeath(0);
+			SetTeamColor(EdgePlayerState->GetTeam());
 		}
 	}
 	if (EdgePlayerController == nullptr)
@@ -1079,38 +1106,9 @@ void AEdgeCharacter::CrosshairTimerFinished()
 	}
 }
 
-void AEdgeCharacter::AddKillText(AEdgeCharacter* EdgeCharacter)
-{
-	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
-	if (HUD)
-	{
-		HUD->AddKillText();
-		APlayerState* EnemyPlayerState = EdgeCharacter->GetPlayerState();
-		if (EnemyPlayerState)
-		{
-			HUD->SetEnemyKilledText(EnemyPlayerState->GetPlayerName());
-		}
-
-	}
-}
-
-void AEdgeCharacter::ClientAddKillText_Implementation(AEdgeCharacter* EdgeCharacter)
-{
-	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
-	if (HUD)
-	{
-		HUD->AddKillText();
-		APlayerState* EnemyPlayerState = EdgeCharacter->GetPlayerState();
-		if (EnemyPlayerState)
-		{
-			HUD->SetEnemyKilledText(EnemyPlayerState->GetPlayerName());
-		}
-	}
-}
-
 void AEdgeCharacter::SpawnDefaultWeapon()
 {
-	AEdgeGameMode* EdgeGameMode = Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this));
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
 	UWorld* World = GetWorld();
 	if (EdgeGameMode && World && !bElimmed && DefaultWeaponClass)
 	{
@@ -1125,7 +1123,7 @@ void AEdgeCharacter::SpawnDefaultWeapon()
 
 void AEdgeCharacter::ServerSpawnDefaultWeapon_Implementation()
 {
-	AEdgeGameMode* EdgeGameMode = Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this));
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
 	UWorld* World = GetWorld();
 	if (EdgeGameMode && World && !bElimmed && DefaultWeaponClass)
 	{
@@ -1176,7 +1174,7 @@ void AEdgeCharacter::Destroyed()
 {
 	Super::Destroyed();
 
-	AEdgeGameMode* EdgeGameMode = Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this));
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
 	//Not in use atm
 	// 
 	//bool bMatchNotInProgress = EdgeGameMode && EdgeGameMode->GetMatchState() != MatchState::InProgress;

@@ -26,6 +26,8 @@ public:
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ELimmedController);
 	void PlayerLeftGame(class AEdgePlayerState* PlayerLeaving);
 
+	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
+
 	UPROPERTY(EditDefaultsOnly)
 		float WarmupTime = 10.f;
 
