@@ -364,20 +364,16 @@ void AEdgeCharacter::PlayReloadMontage()
 	}
 }
 
-void AEdgeCharacter::Elim()
+void AEdgeCharacter::Elim(bool bPlayerLeftGame)
 {
 	DropOrDestroyWeapons();
-	MulticastElim();
-	GetWorldTimerManager().SetTimer(
-		ElimTimer,
-		this,
-		&ThisClass::ElimTimerFinished,
-		ElimDelay
-	);
+	MulticastElim(bPlayerLeftGame);
+	
 }
 
-void AEdgeCharacter::MulticastElim_Implementation()
+void AEdgeCharacter::MulticastElim_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;
 	if (EdgePlayerController)
 	{
 		EdgePlayerController->SetHUDWeaponAmmo(0);
@@ -403,14 +399,34 @@ void AEdgeCharacter::MulticastElim_Implementation()
 	{
 		ShowSniperScopeWidget(false);
 	}
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ThisClass::ElimTimerFinished,
+		ElimDelay
+	);
 }
 
 void AEdgeCharacter::ElimTimerFinished()
 {
 	AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
-	if (EdgeGameMode)
+	if (EdgeGameMode && !bLeftGame)
 	{
 		EdgeGameMode->RequestRespawn(this, Controller);
+	}
+	if (bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
+	}
+}
+
+void AEdgeCharacter::ServerLeaveGame_Implementation()
+{
+	AEdgeGameMode* EdgeGameMode = GetWorld()->GetAuthGameMode<AEdgeGameMode>();
+	EdgePlayerState = EdgePlayerState == nullptr ? GetPlayerState<AEdgePlayerState>() : EdgePlayerState;
+	if (EdgeGameMode && EdgePlayerState)
+	{
+		EdgeGameMode->PlayerLeftGame(EdgePlayerState);
 	}
 }
 

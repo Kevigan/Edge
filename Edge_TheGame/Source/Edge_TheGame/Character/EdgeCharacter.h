@@ -9,6 +9,7 @@
 #include "Edge_TheGame/EdgeTypes/CombatState.h"
 #include "EdgeCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
 UCLASS()
 class EDGE_THEGAME_API AEdgeCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -31,9 +32,9 @@ public:
 	void PlayElimMontage();
 	void PlaySwapMontage();
 
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 	UFUNCTION(NetMulticast, Reliable)
-		void MulticastElim();
+		void MulticastElim(bool bPlayerLeftGame);
 
 	UPROPERTY()
 		class AEdgePlayerState* EdgePlayerState = nullptr;
@@ -135,6 +136,11 @@ public:
 	FTimerHandle EquipTimerFire;
 	void StartEquipTimer();
 	void EquipTimerFinished();
+
+	UFUNCTION(Server, Reliable)
+		void ServerLeaveGame();
+
+	FOnLeftGame OnLeftGame;
 
 protected:
 	virtual void BeginPlay() override;
@@ -288,9 +294,17 @@ private:
 	bool bElimmed = false;
 
 	FTimerHandle ElimTimer;
+
 	void ElimTimerFinished();
+
 	UPROPERTY(EditDefaultsOnly)
 		float ElimDelay = 3.f;
+
+	bool bLeftGame = false;
+
+	
+
+
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
 

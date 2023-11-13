@@ -17,6 +17,7 @@
 #include "Components/Image.h"
 #include "Edge_TheGame/HUD/GameMenu.h"
 
+
 void AEdgePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -106,6 +107,44 @@ void AEdgePlayerController::ShowGameMenu()
 		}
 	}
 
+}
+
+void AEdgePlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
+{
+	ClientElimAnnouncement(Attacker, Victim);
+}
+
+void AEdgePlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
+{
+	APlayerState* Self = GetPlayerState<APlayerState>();
+	if (Attacker && Victim && Self)
+	{
+		EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+		if (EdgeHUD)
+		{
+			if (Attacker == Self && Victim != Self)
+			{
+				EdgeHUD->AddElimAnnouncement("You", Victim->GetPlayerName());
+				return;
+			}
+			if (Victim == Self && Attacker != Self)
+			{
+				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "You");
+				return;
+			}
+			if (Attacker == Victim && Attacker == Self)
+			{
+				EdgeHUD->AddElimAnnouncement("You", "Yourself");
+				return;
+			}
+			if (Attacker == Victim && Attacker != Self)
+			{
+				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "tehmselves");
+				return;
+			}
+			EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
 }
 
 //Is the ping too high?

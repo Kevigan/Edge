@@ -41,6 +41,10 @@ public:
 
 	FHighPingDelegate HighPingDelegate;
 
+	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
+
+	
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -81,6 +85,8 @@ protected:
 
 	void ShowGameMenu();
 
+	UFUNCTION(Client, Reliable)
+		void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
 private:
 	UPROPERTY()

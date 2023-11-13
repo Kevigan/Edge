@@ -10,13 +10,16 @@
 #include "MenuWidget.h"
 #include "Components/TextBlock.h"
 #include "TeamDataWidget.h"
+#include "ElimAnnouncement.h"
+#include "Components/HorizontalBox.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
 
 
 
 void AEdge_HUD::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void AEdge_HUD::AddCharacterOverlay()
@@ -36,6 +39,54 @@ void AEdge_HUD::AddAnnouncement()
 	{
 		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
 		Announcement->AddToViewport();
+	}
+}
+
+void AEdge_HUD::AddElimAnnouncement(FString Attacker, FString Victim)
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && ElimAnnouncementClass)
+	{
+		UElimAnnouncement* ElimAnnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayer, ElimAnnouncementClass);
+		if (ElimAnnouncementWidget)
+		{
+			ElimAnnouncementWidget->SetElimAnnouncementText(Attacker, Victim);
+			ElimAnnouncementWidget->AddToViewport();
+
+			for (UElimAnnouncement* Msg : ElimMessages)
+			{
+				if (Msg && Msg->AnnouncementBox)
+				{
+					UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Msg->AnnouncementBox);
+					if (CanvasSlot)
+					{
+						FVector2D Position = CanvasSlot->GetPosition();
+						FVector2D NewPosition(CanvasSlot->GetPosition().X, Position.Y - CanvasSlot->GetSize().Y);
+						CanvasSlot->SetPosition(NewPosition);
+					}
+				}
+			}
+
+			ElimMessages.Add(ElimAnnouncementWidget);
+
+			FTimerHandle ElimMsgTimer;
+			FTimerDelegate ElimMsgDelegate;
+			ElimMsgDelegate.BindUFunction(this, FName("ELimAnnouncementTimerFinished"), ElimAnnouncementWidget);
+			GetWorldTimerManager().SetTimer(
+				ElimMsgTimer,
+				ElimMsgDelegate,
+				ElimAnnouncementTime,
+				false
+			);
+		}
+	}
+}
+
+void AEdge_HUD::ELimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove)
+{
+	if (MsgToRemove)
+	{
+		MsgToRemove->RemoveFromParent();
 	}
 }
 
@@ -63,7 +114,7 @@ void AEdge_HUD::SetEnemyKilledText(const FString& EnemyName)
 {
 	if (CharacterOverlay)
 	{
-		FString NewStringText =  "You destroyed " + EnemyName + "!";
+		FString NewStringText = "You destroyed " + EnemyName + "!";
 		CharacterOverlay->EnemyKilledText->SetText(FText::FromString(NewStringText));
 		CharacterOverlay->ReceiveOnSetEnemyKilledText(EnemyName);
 	}
@@ -155,4 +206,6 @@ void AEdge_HUD::DrawCrosshair(UTexture2D* Texture, FVector2D VierwportCenter, FV
 		CrosshairsColor
 	);
 }
+
+
 

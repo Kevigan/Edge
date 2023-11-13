@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
 		TSubclassOf<class UTeamDataWidget> TeamDataWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = Config = PlayerStats)
+		TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
+
 	UPROPERTY()
 		UCharacterOverlay* CharacterOverlay = nullptr;
 
@@ -78,9 +81,10 @@ public:
 		class UAnnouncement* Announcement = nullptr;
 
 	void AddAnnouncement();
+	void AddElimAnnouncement(FString Attacker, FString Victim);
 	void AddMiniMap();
 	void AddKillText();
-	
+
 	void SetEnemyKilledText(const FString& EnemyName);
 	void AddTeamDataWidget();
 	void RemoveTeamDataWidget();
@@ -95,6 +99,18 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		float CrosshairSpreadMax = 16.f;
+
+	UPROPERTY()
+		APlayerController* OwningPlayer;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float ElimAnnouncementTime = 2.5f;
+
+	UFUNCTION()
+	void ELimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);
+
+	UPROPERTY()
+	TArray<UElimAnnouncement*> ElimMessages;
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

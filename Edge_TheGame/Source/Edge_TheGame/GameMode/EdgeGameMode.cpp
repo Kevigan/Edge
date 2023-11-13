@@ -100,7 +100,16 @@ void AEdgeGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlay
 
 	if (ElimmedCharacter)
 	{
-		ElimmedCharacter->Elim();
+		ElimmedCharacter->Elim(false);
+	}
+	
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AEdgePlayerController* EdgePlayer = Cast<AEdgePlayerController>(*It);
+		if (EdgePlayer && AttackerPlayerState && VictimPlayerState)
+		{
+			EdgePlayer->BroadcastElim(AttackerPlayerState, VictimPlayerState);
+		}
 	}
 }
 
@@ -117,6 +126,21 @@ void AEdgeGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* EL
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(ELimmedController, PlayerStarts[Selection]);
+	}
+}
+
+void AEdgeGameMode::PlayerLeftGame(AEdgePlayerState* PlayerLeaving)
+{
+	if (PlayerLeaving == nullptr) return;
+	AEdgeGameState* EdgeGameState = GetGameState<AEdgeGameState>();
+	if (EdgeGameState && EdgeGameState->TopScoringPlayers.Contains(PlayerLeaving))
+	{
+		EdgeGameState->TopScoringPlayers.Remove(PlayerLeaving);
+	}
+	AEdgeCharacter* CharacterLeaving = Cast<AEdgeCharacter>(PlayerLeaving->GetPawn());
+	if (CharacterLeaving)
+	{
+		CharacterLeaving->Elim(true);
 	}
 }
 

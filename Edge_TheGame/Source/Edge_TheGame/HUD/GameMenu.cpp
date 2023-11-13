@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "GameFramework/GameModeBase.h"
+#include "Edge_TheGame/Character/EdgeCharacter.h"
 
 void UGameMenu::MenuSetup()
 {
@@ -109,6 +110,28 @@ void UGameMenu::ReturnToMainMenuButtonClicked()
 {
 	ReturnToMainMenuButton->SetIsEnabled(false);
 
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		APlayerController* FirstPlayerController = World->GetFirstPlayerController();
+		if (FirstPlayerController)
+		{
+			AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(FirstPlayerController->GetPawn());
+			if (EdgeCharacter)
+			{
+				EdgeCharacter->ServerLeaveGame();
+				EdgeCharacter->OnLeftGame.AddDynamic(this, &ThisClass::OnPlayerLeftGame);
+			}
+			else
+			{
+				ReturnToMainMenuButton->SetIsEnabled(true);
+			}
+		}
+	}
+}
+
+void UGameMenu::OnPlayerLeftGame()
+{
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->DestroySession();
