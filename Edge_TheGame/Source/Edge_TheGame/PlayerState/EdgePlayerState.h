@@ -44,4 +44,7 @@ private:
 public:
 	FORCEINLINE ETeam GetTeam() const { return Team; }
 	void SetTeam(ETeam TeamToSet);
+
+	UFUNCTION(BlueprintCallable)
+		int32 GetDeath() { return Death; }
 };

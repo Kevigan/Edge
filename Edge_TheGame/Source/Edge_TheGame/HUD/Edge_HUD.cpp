@@ -107,9 +107,9 @@ void AEdge_HUD::AddTeamDataWidget()
 	{
 		TeamDataWidgetOverlay = CreateWidget<UTeamDataWidget>(PlayerController, TeamDataWidgetClass);
 		TeamDataWidgetOverlay->AddToViewport();
-		PlayerController->bShowMouseCursor = true;
+		/*PlayerController->bShowMouseCursor = true;
 		PlayerController->SetInputMode(FInputModeGameOnly());
-		PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreLookInput(true);*/
 	}
 }
 
@@ -119,9 +119,9 @@ void AEdge_HUD::RemoveTeamDataWidget()
 	if (PlayerController && TeamDataWidgetOverlay)
 	{
 		TeamDataWidgetOverlay->RemoveFromParent();
-		PlayerController->bShowMouseCursor = false;
+		/*PlayerController->bShowMouseCursor = false;
 		PlayerController->SetInputMode(FInputModeGameOnly());
-		PlayerController->SetIgnoreLookInput(false);
+		PlayerController->SetIgnoreLookInput(false);*/
 	}
 }
 

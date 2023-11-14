@@ -72,3 +72,14 @@ void AEdgeGameState::OnRep_BlueTeamScore()
 		EdgePlayerController->SetHUDBlueTeamScore(BlueTeamScore);
 	}
 }
+
+void AEdgeGameState::TestShit()
+{
+	if (HasAuthority())GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("FU")));
+	else DoSOmething();
+}
+
+void AEdgeGameState::DoSOmething_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("FME")));
+}

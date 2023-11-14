@@ -25,12 +25,13 @@ public:
 	/*
 	* Teams
 	*/
-
 	void RedTeamScores();
 	void BlueTeamScores();
 
-	TArray<AEdgePlayerState*> RedTeam;
-	TArray<AEdgePlayerState*> BlueTeam;
+	UPROPERTY(BlueprintReadWrite)
+		TArray<AEdgePlayerState*> RedTeam;
+	UPROPERTY(BlueprintReadWrite)
+		TArray<AEdgePlayerState*> BlueTeam;
 
 	UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
 		float RedTeamScore = 0.f;
@@ -44,9 +45,16 @@ public:
 	UFUNCTION()
 		void OnRep_BlueTeamScore();
 
+	UFUNCTION(BlueprintCallable)
+		void TestShit();
+
+	UFUNCTION(Client, Reliable)
+		void DoSOmething();
 
 protected:
 
 private:
 	float TopScore = 0.f;
+
+
 };
