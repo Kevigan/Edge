@@ -74,7 +74,7 @@ void AEdgeGameMode::OnMatchStateSet()
 		AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(*It);
 		if (EdgePlayerController)
 		{
-			EdgePlayerController->OnMatchStateSet(MatchState);
+			EdgePlayerController->OnMatchStateSet(MatchState, bTeamsMatch);
 			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("OnMatchStateSet")));
 
 		}

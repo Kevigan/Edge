@@ -31,6 +31,7 @@ void AEdgePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AEdgePlayerController, MatchState);
+	DOREPLIFETIME(AEdgePlayerController, bShowTeamScores);
 }
 
 void AEdgePlayerController::SetupInputComponent()
@@ -109,9 +110,80 @@ void AEdgePlayerController::ShowGameMenu()
 
 }
 
+void AEdgePlayerController::OnRep_ShowTeamsScores()
+{
+	if (bShowTeamScores)
+	{
+		InitTeamScores();
+	}
+	else
+	{
+		HideTeamScores();
+	}
+}
+
 void AEdgePlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
 {
 	ClientElimAnnouncement(Attacker, Victim);
+}
+
+void AEdgePlayerController::HideTeamScores()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD && 
+		EdgeHUD->CharacterOverlay && 
+		EdgeHUD->CharacterOverlay->RedTeamScore && 
+		EdgeHUD->CharacterOverlay->BlueTeamScore;
+	if (bHUDValid)
+	{
+		EdgeHUD->CharacterOverlay->RedTeamScore->SetText(FText());
+		EdgeHUD->CharacterOverlay->BlueTeamScore->SetText(FText());
+	}
+}
+
+void AEdgePlayerController::InitTeamScores()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD &&
+		EdgeHUD->CharacterOverlay &&
+		EdgeHUD->CharacterOverlay->RedTeamScore &&
+		EdgeHUD->CharacterOverlay->BlueTeamScore;
+	if (bHUDValid)
+	{
+		FString Zero("0");
+		EdgeHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(Zero));
+		EdgeHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(Zero));
+	}
+}
+
+void AEdgePlayerController::SetHUDRedTeamScore(int32 RedScore)
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD &&
+		EdgeHUD->CharacterOverlay &&
+		EdgeHUD->CharacterOverlay->RedTeamScore;
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), RedScore);
+		EdgeHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreText));
+	}
+}
+
+void AEdgePlayerController::SetHUDBlueTeamScore(int32 BlueScore)
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	bool bHUDValid = EdgeHUD &&
+		EdgeHUD->CharacterOverlay &&
+		EdgeHUD->CharacterOverlay->BlueTeamScore;
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), BlueScore);
+		EdgeHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreText));
+	}
 }
 
 void AEdgePlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
@@ -443,14 +515,14 @@ void AEdgePlayerController::ReceivedPlayer()
 	}
 }
 
-void AEdgePlayerController::OnMatchStateSet(FName State)
+void AEdgePlayerController::OnMatchStateSet(FName State, bool bTeamsMatch)
 {
 	MatchState = State;
 
 
 	if (MatchState == MatchState::InProgress)
 	{
-		HandleMatchHasStarted();
+		HandleMatchHasStarted(bTeamsMatch);
 	}
 	else if (MatchState == MatchState::Cooldown)
 	{
@@ -470,8 +542,9 @@ void AEdgePlayerController::OnRep_MatchState()
 	}
 }
 
-void AEdgePlayerController::HandleMatchHasStarted()
+void AEdgePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
+	if(HasAuthority()) bShowTeamScores = bTeamsMatch;
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 	if (EdgeHUD)
 	{
@@ -482,6 +555,15 @@ void AEdgePlayerController::HandleMatchHasStarted()
 		if (EdgeHUD->Announcement)
 		{
 			EdgeHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+		if (!HasAuthority()) return;
+		if (bTeamsMatch)
+		{
+			InitTeamScores();
+		}
+		else
+		{
+			HideTeamScores();
 		}
 	}
 }

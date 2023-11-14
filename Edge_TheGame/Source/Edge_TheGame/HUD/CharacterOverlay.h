@@ -49,8 +49,8 @@ public:
 		UTextBlock* EnemyKilledText = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* TeamAValue = nullptr;
+		class UTextBlock* RedTeamScore = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* TeamBValue = nullptr;
+		class UTextBlock* BlueTeamScore = nullptr;
 };

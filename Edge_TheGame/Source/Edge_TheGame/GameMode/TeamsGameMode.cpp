@@ -5,6 +5,12 @@
 #include "Edge_TheGame/GameState/EdgeGameState.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
+
+ATeamsGameMode::ATeamsGameMode()
+{
+	bTeamsMatch = true;
+}
 
 void ATeamsGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -88,4 +94,23 @@ float ATeamsGameMode::CalculateDamage(AController* Attacker, AController* Victim
 		return 0.f;
 	}
 	return BaseDamage;
+}
+
+void ATeamsGameMode::PlayerEliminated(AEdgeCharacter* ElimmedCharacter, AEdgePlayerController* VictimController, AEdgePlayerController* AttackerContoller)
+{
+	Super::PlayerEliminated(ElimmedCharacter, VictimController, AttackerContoller);
+
+	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+	AEdgePlayerState* AttackerPlayerState = AttackerContoller ? Cast<AEdgePlayerState>(AttackerContoller->PlayerState) : nullptr;
+	if (EdgeGameState && AttackerPlayerState)
+	{
+		if (AttackerPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+		{
+			EdgeGameState->BlueTeamScores();
+		}
+		if (AttackerPlayerState->GetTeam() == ETeam::ET_RedTeam)
+		{
+			EdgeGameState->RedTeamScores();
+		}
+	}
 }

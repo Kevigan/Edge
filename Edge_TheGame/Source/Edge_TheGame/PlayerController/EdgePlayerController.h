@@ -30,8 +30,8 @@ public:
 	virtual float GetServerTime(); // synced with server world clock
 	virtual void ReceivedPlayer() override; // sync with server clock as soon as possible
 
-	void OnMatchStateSet(FName State);
-	void HandleMatchHasStarted();
+	void OnMatchStateSet(FName State, bool bTeamsMatch = false);
+	void HandleMatchHasStarted(bool bTeamsMatch = false);
 	void HandleCooldown();
 	void ShowTeamData();
 	bool MenuOpen = false;
@@ -43,7 +43,10 @@ public:
 
 	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
 
-	
+	void HideTeamScores();
+	void InitTeamScores();
+	void SetHUDRedTeamScore(int32 RedScore);
+	void SetHUDBlueTeamScore(int32 BlueScore);
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,6 +90,12 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 		void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamsScores)
+	bool bShowTeamScores = false;
+
+	UFUNCTION()
+	void OnRep_ShowTeamsScores();
 
 private:
 	UPROPERTY()

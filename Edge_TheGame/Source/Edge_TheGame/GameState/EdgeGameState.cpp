@@ -4,6 +4,7 @@
 #include "EdgeGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
+#include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 
 void AEdgeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -32,10 +33,42 @@ void AEdgeGameState::UpdateTopScore(AEdgePlayerState* ScoringPlayer)
 	}
 }
 
+void AEdgeGameState::RedTeamScores()
+{
+	++RedTeamScore;
+
+	AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDRedTeamScore(RedTeamScore);
+	}
+}
+
+void AEdgeGameState::BlueTeamScores()
+{
+	++BlueTeamScore;
+
+	AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDBlueTeamScore(BlueTeamScore);
+	}
+}
+
 void AEdgeGameState::OnRep_RedTeamScore()
 {
+	AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDRedTeamScore(RedTeamScore);
+	}
 }
 
 void AEdgeGameState::OnRep_BlueTeamScore()
 {
+	AEdgePlayerController* EdgePlayerController = Cast<AEdgePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->SetHUDBlueTeamScore(BlueTeamScore);
+	}
 }
