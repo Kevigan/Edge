@@ -47,4 +47,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		int32 GetDeath() { return Death; }
+
+	
 };

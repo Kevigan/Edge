@@ -48,7 +48,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 			}
 			else // CLient, using ssr
 			{
-				if (InstigatorPawn->IsLocallyControlled()) // Client, locally controlled - spawn non replicated projectile, use ssr
+				if (InstigatorPawn != nullptr && InstigatorPawn->IsLocallyControlled()) // Client, locally controlled - spawn non replicated projectile, use ssr
 				{
 					SpawnedProjectile = World->SpawnActor<AProjectile>(ServerSideRewindProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 					if (SpawnedProjectile != nullptr)
@@ -71,7 +71,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 		}
 		else // Weapon not using ssr
 		{
-			if (InstigatorPawn->HasAuthority())
+			if (InstigatorPawn != nullptr && InstigatorPawn->HasAuthority())
 			{
 				SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 				if (SpawnedProjectile != nullptr)

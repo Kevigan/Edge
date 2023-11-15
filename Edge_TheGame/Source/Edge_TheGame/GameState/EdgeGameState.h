@@ -48,8 +48,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void TestShit();
 
-	UFUNCTION(Client, Reliable)
-		void DoSOmething();
+	UFUNCTION(Server, Reliable)
+		void ServerDoSOmething();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastDoSOmething(const TArray<AEdgePlayerState*>& Team);
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "TestingShit"))
+		void ReceiveOnShit(/*UPARAM(ref) TArray<AEdgePlayerState*>& Shit*/);
 
 protected:
 

@@ -75,11 +75,20 @@ void AEdgeGameState::OnRep_BlueTeamScore()
 
 void AEdgeGameState::TestShit()
 {
-	if (HasAuthority())GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("FU")));
-	else DoSOmething();
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("shushishe")));
+	if (!HasAuthority())ServerDoSOmething();
+	//else DoSOmething();
 }
 
-void AEdgeGameState::DoSOmething_Implementation()
+void AEdgeGameState::ServerDoSOmething_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("FME")));
+	MulticastDoSOmething(RedTeam);
+}
+
+void AEdgeGameState::MulticastDoSOmething_Implementation(const TArray<AEdgePlayerState*>& Team)
+{
+	for (auto PState : Team)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Name: %s"), *PState->GetPlayerName()));
+	}
 }
