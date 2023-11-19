@@ -14,8 +14,10 @@ class EDGE_THEGAME_API UGameMenu : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void MenuSetup();
-	void MenuTearDown();
+	UFUNCTION(BlueprintCallable)
+		void MenuSetup();
+	UFUNCTION(BlueprintCallable)
+		void MenuTearDown();
 
 protected:
 	virtual bool Initialize() override;
