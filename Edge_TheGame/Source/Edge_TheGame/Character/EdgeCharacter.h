@@ -140,6 +140,9 @@ public:
 
 	void SetTeamColor(ETeam Team);
 
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastTabPressed(const TArray<class AEdgePlayerState*>& ServerRedTeam, const TArray< AEdgePlayerState*>& ServerBlueTeam);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -165,6 +168,17 @@ protected:
 	void PlayHitUI();
 	void DropOrDestroyWeapon(AWeapon* Weapon);
 	void DropOrDestroyWeapons();
+	void SetSpawnPoint();
+	void OnPlayerStateInitialized();
+
+	UFUNCTION(Server, Reliable)
+		void ServerTabPressed();
+
+	UPROPERTY(BlueprintReadWrite)
+		TArray<AEdgePlayerState*> RedTeam;
+
+		UPROPERTY(BlueprintReadWrite)
+		TArray<AEdgePlayerState*> BlueTeam;
 
 	UFUNCTION(Client, Reliable)
 		void SpawnPlayerIndicator();
@@ -333,7 +347,7 @@ private:
 		UMaterialInstance* NoTeamMat;
 
 	UPROPERTY(EditAnywhere)
-	class AEdgeGameMode* EdgeGameMode;
+		class AEdgeGameMode* EdgeGameMode;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

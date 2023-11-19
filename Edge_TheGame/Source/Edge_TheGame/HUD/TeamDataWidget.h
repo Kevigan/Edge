@@ -16,4 +16,5 @@ class EDGE_THEGAME_API UTeamDataWidget : public UUserWidget
 	
 public:
 	
+	
 };

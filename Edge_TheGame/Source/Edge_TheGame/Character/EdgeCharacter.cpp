@@ -24,6 +24,8 @@
 #include "Edge_TheGame/EdgeComponents/LagCompensationComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/BoxComponent.h"
+#include "Edge_TheGame/PlayerStart/TeamPlayerStart.h"
+#include "Edge_TheGame/GameState/EdgeGameState.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -200,7 +202,7 @@ void AEdgeCharacter::SetTeamColor(ETeam Team)
 	switch (Team)
 	{
 	case ETeam::ET_NoTeam:
-		GetMesh()->SetMaterial(0,NoTeamMat);
+		GetMesh()->SetMaterial(0, NoTeamMat);
 		break;
 	case ETeam::ET_BlueTeam:
 		GetMesh()->SetMaterial(0, BlueTeamMat);
@@ -478,6 +480,40 @@ void AEdgeCharacter::DropOrDestroyWeapons()
 	}
 }
 
+void AEdgeCharacter::OnPlayerStateInitialized()
+{
+	EdgePlayerState->AddToScore(0.f);
+	EdgePlayerState->AddToDeath(0);
+	SetTeamColor(EdgePlayerState->GetTeam());
+	SetSpawnPoint();
+}
+
+void AEdgeCharacter::SetSpawnPoint()
+{
+	if (HasAuthority() && EdgePlayerState->GetTeam() != ETeam::ET_NoTeam)
+	{
+		TArray<AActor*> PlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
+		TArray<ATeamPlayerStart*> TeamPlayerStarts;
+		for (auto Start : PlayerStarts)
+		{
+			ATeamPlayerStart* TeamStart = Cast<ATeamPlayerStart>(Start);
+			if (TeamStart && TeamStart->Team == EdgePlayerState->GetTeam())
+			{
+				TeamPlayerStarts.Add(TeamStart);
+			}
+		}
+		if (TeamPlayerStarts.Num() > 0)
+		{
+			ATeamPlayerStart* ChosenPlayerStart = TeamPlayerStarts[FMath::RandRange(0, TeamPlayerStarts.Num() - 1)];
+			SetActorLocationAndRotation(
+				ChosenPlayerStart->GetActorLocation(),
+				ChosenPlayerStart->GetActorRotation()
+			);
+		}
+	}
+}
+
 void AEdgeCharacter::PlayElimMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -542,7 +578,7 @@ void AEdgeCharacter::SpawnMiniMap()
 			FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 10000.f),
 			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
-			);
+		);
 		if (MiniMapActor)
 		{
 			//MiniMapActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
@@ -566,7 +602,7 @@ void AEdgeCharacter::SpawnMiniMap()
 			GetActorLocation(),
 			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
-			);
+		);
 		if (PlayerIndicatorActor)
 		{
 			//PlayerIndicatorActor->Owner = this;
@@ -766,6 +802,22 @@ void AEdgeCharacter::AimButtonReleased()
 
 void AEdgeCharacter::TabButtonPressed()
 {
+	ServerTabPressed();
+}
+
+void AEdgeCharacter::ServerTabPressed_Implementation()
+{
+	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(GetWorld()->GetGameState());
+	if (EdgeGameState)
+	{
+		MulticastTabPressed(EdgeGameState->RedTeam, EdgeGameState->BlueTeam);
+	}
+}
+
+void AEdgeCharacter::MulticastTabPressed_Implementation(const TArray<class AEdgePlayerState*>& ServerRedTeam, const TArray< AEdgePlayerState*>& ServerBlueTeam)
+{
+	RedTeam = ServerRedTeam;
+	BlueTeam = ServerBlueTeam;
 	EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
 	if (EdgePlayerController)
 	{
@@ -1017,9 +1069,7 @@ void AEdgeCharacter::PollInit()
 		EdgePlayerState = GetPlayerState<AEdgePlayerState>();
 		if (EdgePlayerState)
 		{
-			EdgePlayerState->AddToScore(0.f);
-			EdgePlayerState->AddToDeath(0);
-			SetTeamColor(EdgePlayerState->GetTeam());
+			OnPlayerStateInitialized();
 		}
 	}
 	if (EdgePlayerController == nullptr)
