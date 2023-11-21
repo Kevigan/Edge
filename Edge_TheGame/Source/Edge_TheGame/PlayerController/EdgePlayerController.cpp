@@ -630,7 +630,18 @@ void AEdgePlayerController::ShowTeamData()
 		EdgeHUD->AddTeamDataWidget();
 		TeamDataOpen = true;
 	}
-	else if (EdgeHUD && TeamDataOpen)
+	/*else if (EdgeHUD && TeamDataOpen)
+	{
+		EdgeHUD->RemoveTeamDataWidget();
+		TeamDataOpen = false;
+	}*/
+}
+
+void AEdgePlayerController::HideTeamData()
+{
+	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
+
+	if (EdgeHUD && TeamDataOpen)
 	{
 		EdgeHUD->RemoveTeamDataWidget();
 		TeamDataOpen = false;

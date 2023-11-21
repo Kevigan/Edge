@@ -34,6 +34,7 @@ public:
 	void HandleMatchHasStarted(bool bTeamsMatch = false);
 	void HandleCooldown();
 	void ShowTeamData();
+	void HideTeamData();
 	bool MenuOpen = false;
 	bool TeamDataOpen = false;
 

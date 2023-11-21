@@ -143,6 +143,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastTabPressed(const TArray<class AEdgePlayerState*>& ServerRedTeam, const TArray< AEdgePlayerState*>& ServerBlueTeam);
 
+	UPROPERTY(BlueprintReadWrite)
+		int32 InvertedLookMultiplyer = 1;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -157,6 +160,7 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void TabButtonPressed();
+	void TabButtonReleased();
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
 	void SimProxiesTurn();
@@ -177,7 +181,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		TArray<AEdgePlayerState*> RedTeam;
 
-		UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		TArray<AEdgePlayerState*> BlueTeam;
 
 	UFUNCTION(Client, Reliable)

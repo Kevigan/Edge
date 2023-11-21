@@ -252,7 +252,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ThisClass::FireButtonReleased);
 	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Pressed, this, &ThisClass::TabButtonPressed);
-	PlayerInputComponent->BindAction("ShowTeamData", IE_Released, this, &ThisClass::TabButtonPressed);
+	PlayerInputComponent->BindAction("ShowTeamData", IE_Released, this, &ThisClass::TabButtonReleased);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
@@ -662,7 +662,7 @@ void AEdgeCharacter::Turn(float Value)
 
 void AEdgeCharacter::LookUp(float Value)
 {
-	AddControllerPitchInput(Value);
+	AddControllerPitchInput(Value * InvertedLookMultiplyer);
 }
 
 void AEdgeCharacter::MouseWheelTurned()
@@ -803,6 +803,15 @@ void AEdgeCharacter::AimButtonReleased()
 void AEdgeCharacter::TabButtonPressed()
 {
 	ServerTabPressed();
+}
+
+void AEdgeCharacter::TabButtonReleased()
+{
+	EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
+	if (EdgePlayerController)
+	{
+		EdgePlayerController->HideTeamData();
+	}
 }
 
 void AEdgeCharacter::ServerTabPressed_Implementation()
