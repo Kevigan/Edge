@@ -11,6 +11,8 @@
 #include "particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Edge_TheGame/EdgeComponents/LagCompensationComponent.h"
+//#include "NiagaraFunctionLibrary.h"
+//#include "NiagaraComponent.h"
 
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -44,7 +46,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					UDamageType::StaticClass()
 				);
 			}
-			if(!HasAuthority() && bUseServerSideRewind)
+			if (!HasAuthority() && bUseServerSideRewind)
 			{
 				EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(OwnerPawn) : EdgeOwnerCharacter;
 				EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(InstigatorController) : EdgeOwnerController;
@@ -62,12 +64,21 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		}
 		if (ImpactParticles)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				ImpactParticles,
-				FireHit.ImpactPoint,
-				FireHit.ImpactNormal.Rotation()
-			);
+
+			if (FireHit.GetActor()->IsA<AEdgeCharacter>())
+			{
+				ReceiveOnHitBody(FireHit.ImpactPoint, FireHit.ImpactNormal.Rotation());
+			}
+			else
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(
+					GetWorld(),
+					ImpactParticles,
+					FireHit.ImpactPoint,
+					FireHit.ImpactNormal.Rotation()
+				);
+			}
+
 		}
 		if (HitSound)
 		{

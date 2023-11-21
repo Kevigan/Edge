@@ -17,6 +17,8 @@ class EDGE_THEGAME_API AHitScanWeapon : public AWeapon
 public:
 	virtual void Fire(const FVector& HitTarget) override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnHitBody(FVector Location, FRotator Rotation);
 
 protected:
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
@@ -27,7 +29,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Config)
 		class USoundCue* HitSound;
 
-	
 
 private:
 	UPROPERTY(EditAnywhere, Category = Config)
