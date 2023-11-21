@@ -64,8 +64,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		}
 		if (ImpactParticles)
 		{
-
-			if (FireHit.GetActor()->IsA<AEdgeCharacter>())
+			if (FireHit.GetActor() && FireHit.GetActor()->IsA<AEdgeCharacter>())
 			{
 				ReceiveOnHitBody(FireHit.ImpactPoint, FireHit.ImpactNormal.Rotation());
 			}

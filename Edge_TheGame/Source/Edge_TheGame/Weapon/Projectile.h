@@ -28,6 +28,10 @@ public:
 
 	float Damage = 20.f;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnHitBodyProjectile(FVector Location, FRotator Rotation);
+
+
 protected:
 	virtual void BeginPlay() override;
 

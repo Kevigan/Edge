@@ -46,6 +46,8 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 			{
 				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
 				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+				
+			
 				return;
 			}
 			AEdgeCharacter* HitCharacter = Cast<AEdgeCharacter>(OtherActor);

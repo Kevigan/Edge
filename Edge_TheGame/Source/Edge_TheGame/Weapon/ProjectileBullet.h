@@ -17,6 +17,8 @@ class EDGE_THEGAME_API AProjectileBullet : public AProjectile
 public:
 	AProjectileBullet();
 
+	
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& Event) override;
 #endif
