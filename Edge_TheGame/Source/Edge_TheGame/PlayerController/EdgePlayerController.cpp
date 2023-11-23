@@ -131,9 +131,9 @@ void AEdgePlayerController::HideTeamScores()
 {
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 
-	bool bHUDValid = EdgeHUD && 
-		EdgeHUD->CharacterOverlay && 
-		EdgeHUD->CharacterOverlay->RedTeamScore && 
+	bool bHUDValid = EdgeHUD &&
+		EdgeHUD->CharacterOverlay &&
+		EdgeHUD->CharacterOverlay->RedTeamScore &&
 		EdgeHUD->CharacterOverlay->BlueTeamScore;
 	if (bHUDValid)
 	{
@@ -196,25 +196,25 @@ void AEdgePlayerController::ClientElimAnnouncement_Implementation(APlayerState* 
 		{
 			if (Attacker == Self && Victim != Self)
 			{
-				EdgeHUD->AddElimAnnouncement("You", Victim->GetPlayerName());
+				EdgeHUD->AddElimAnnouncement("You", Victim->GetPlayerName(), Attacker, Victim);
 				return;
 			}
 			if (Victim == Self && Attacker != Self)
 			{
-				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "You");
+				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "You", Attacker, Victim);
 				return;
 			}
 			if (Attacker == Victim && Attacker == Self)
 			{
-				EdgeHUD->AddElimAnnouncement("You", "Yourself");
+				EdgeHUD->AddElimAnnouncement("You", "Yourself", Attacker, Victim);
 				return;
 			}
 			if (Attacker == Victim && Attacker != Self)
 			{
-				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "tehmselves");
+				EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), "tehmselves", Attacker, Victim);
 				return;
 			}
-			EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
+			EdgeHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName(), Attacker, Victim);
 		}
 	}
 }
@@ -544,7 +544,7 @@ void AEdgePlayerController::OnRep_MatchState()
 
 void AEdgePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
-	if(HasAuthority()) bShowTeamScores = bTeamsMatch;
+	if (HasAuthority()) bShowTeamScores = bTeamsMatch;
 	EdgeHUD = EdgeHUD == nullptr ? Cast<AEdge_HUD>(GetHUD()) : EdgeHUD;
 	if (EdgeHUD)
 	{
@@ -590,28 +590,45 @@ void AEdgePlayerController::HandleCooldown()
 				FString InfoTextString;
 				if (TopPlayers.Num() == 0)
 				{
-					InfoTextString = FString("There is no winner");
+					InfoTextString = FString("There is no Top Scorer");
 				}
 				else if (TopPlayers.Num() == 1 && TopPlayers[0] == EdgePlayerState)
 				{
-					InfoTextString = FString("You are the winner!");
+					InfoTextString = FString("You are the Top Scorer!");
 				}
 				else if (TopPlayers.Num() == 1)
 				{
-					InfoTextString = FString::Printf(TEXT("Winner: \n%s"), *TopPlayers[0]->GetPlayerName());
+					InfoTextString = FString::Printf(TEXT("Top Scorer: \n%s"), *TopPlayers[0]->GetPlayerName());
 				}
 				else if (TopPlayers.Num() > 1)
 				{
-					InfoTextString = FString("Players tied for the win:\n");
+					InfoTextString = FString("Players tied for Top Scorer:\n");
 					for (auto TiedPlayer : TopPlayers)
 					{
 						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
 					}
 				}
 				EdgeHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
+
+				FString WinnerTeamInfoTextString;
+				if (EdgeGameState->RedTeamScore > EdgeGameState->BlueTeamScore)
+				{
+					WinnerTeamInfoTextString = FString("Red Team Won!");
+					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255,0,0,255));
+				}
+				else if (EdgeGameState->RedTeamScore < EdgeGameState->BlueTeamScore)
+				{
+					WinnerTeamInfoTextString = FString("Blue Team Won!");
+					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(0, 0, 255, 255));
+				}
+				else
+				{
+					WinnerTeamInfoTextString = FString("Both Teams Tied!");
+					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255, 255, 255, 255));
+				}
+
+				EdgeHUD->Announcement->WinnerTeamInfoText->SetText(FText::FromString(WinnerTeamInfoTextString));
 			}
-
-
 		}
 	}
 	AEdgeCharacter* EdgeCharacter = Cast<AEdgeCharacter>(GetPawn());

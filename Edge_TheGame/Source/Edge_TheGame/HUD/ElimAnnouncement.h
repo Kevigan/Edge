@@ -15,11 +15,17 @@ class EDGE_THEGAME_API UElimAnnouncement : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetElimAnnouncementText(FString AttackerName, FString VictimName);
+	void SetElimAnnouncementText(FString AttackerName, FString VictimName, APlayerState* AttackerPS, APlayerState* VictimPS);
 
 	UPROPERTY(meta = (BindWidget))
 		class UHorizontalBox* AnnouncementBox;
 
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* AnnouncementText;
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* AttackerNameText;
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* VictimNameText;
 };

@@ -14,6 +14,7 @@
 #include "Components/HorizontalBox.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 
 
 
@@ -42,15 +43,15 @@ void AEdge_HUD::AddAnnouncement()
 	}
 }
 
-void AEdge_HUD::AddElimAnnouncement(FString Attacker, FString Victim)
+void AEdge_HUD::AddElimAnnouncement(FString Attacker, FString Victim, APlayerState* AttackerPS, APlayerState* VictimPS)
 {
 	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
 	if (OwningPlayer && ElimAnnouncementClass)
 	{
 		UElimAnnouncement* ElimAnnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayer, ElimAnnouncementClass);
-		if (ElimAnnouncementWidget)
+		if (ElimAnnouncementWidget && AttackerPS && VictimPS)
 		{
-			ElimAnnouncementWidget->SetElimAnnouncementText(Attacker, Victim);
+			ElimAnnouncementWidget->SetElimAnnouncementText(Attacker, Victim, AttackerPS, VictimPS);
 			ElimAnnouncementWidget->AddToViewport();
 
 			for (UElimAnnouncement* Msg : ElimMessages)

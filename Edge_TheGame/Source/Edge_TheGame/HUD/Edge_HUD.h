@@ -75,7 +75,7 @@ public:
 		class UAnnouncement* Announcement = nullptr;
 
 	void AddAnnouncement();
-	void AddElimAnnouncement(FString Attacker, FString Victim);
+	void AddElimAnnouncement(FString Attacker, FString Victim, class APlayerState* AttackerPS, APlayerState* VictimPS);
 	void AddMiniMap();
 	
 	void AddTeamDataWidget();
