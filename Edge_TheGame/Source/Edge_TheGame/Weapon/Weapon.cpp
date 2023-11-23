@@ -213,6 +213,7 @@ void AWeapon::OnEquipped()
 			EdgeOwnerController->HighPingDelegate.AddDynamic(this, &ThisClass::OnPingTooHigh);
 		}
 	}
+	ReceiveOnEquipped();
 }
 
 void AWeapon::OnEquippedSecondary()
@@ -232,6 +233,7 @@ void AWeapon::OnEquippedSecondary()
 			EdgeOwnerController->HighPingDelegate.RemoveDynamic(this, &ThisClass::OnPingTooHigh);
 		}
 	}
+	ReceiveOnEquipped();
 }
 
 void AWeapon::OnDropped()

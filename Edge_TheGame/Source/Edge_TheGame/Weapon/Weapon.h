@@ -106,6 +106,9 @@ protected:
 	virtual void OnDropped();
 	virtual void OnEquippedSecondary();
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnEquipped();
+
 	UFUNCTION()
 		virtual void OnSphereOverlap(
 			UPrimitiveComponent* OverlappedComponent,
@@ -150,9 +153,10 @@ protected:
 	UFUNCTION()
 		void OnPingTooHigh(bool bPingTooHigh);
 
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Weapon Properties")
 		USkeletalMeshComponent* WeaponMesh = nullptr;
+
+private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 		class USphereComponent* AreaSphere = nullptr;
