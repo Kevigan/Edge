@@ -322,8 +322,7 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 			EdgePlayerController = EdgePlayerController == nullptr ? Cast<AEdgePlayerController>(Controller) : EdgePlayerController;
 			AEdgePlayerController* AttackerController = Cast<AEdgePlayerController>(InstigatorController);
 			EdgeGameMode->PlayerEliminated(this, EdgePlayerController, AttackerController);
-			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString(TEXT("freeeeeeeeeeeee3!")));
-			// 
+
 			//On Death change crosshair color
 			if (OwnerCharacter)
 			{

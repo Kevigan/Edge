@@ -23,7 +23,6 @@ void AEdgeGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("GameMode")));
 
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }

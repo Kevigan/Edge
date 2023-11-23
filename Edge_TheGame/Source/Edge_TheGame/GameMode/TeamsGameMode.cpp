@@ -84,13 +84,18 @@ float ATeamsGameMode::CalculateDamage(AController* Attacker, AController* Victim
 {
 	AEdgePlayerState* AttackerPState = Attacker->GetPlayerState<AEdgePlayerState>();
 	AEdgePlayerState* VictimPState = Victim->GetPlayerState<AEdgePlayerState>();
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("1111111")));
+
 	if (AttackerPState == nullptr || VictimPState == nullptr) return BaseDamage;
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("2222222")));
 	if (VictimPState == AttackerPState)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("33333333")));
 		return 0.f;
 	}
 	if (AttackerPState->GetTeam() == VictimPState->GetTeam())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("44444444")));
 		return 0.f;
 	}
 	return BaseDamage;
