@@ -5,6 +5,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Edge_TheGame/PlayerState/EdgePlayerState.h"
 #include "Edge_TheGame/PlayerController/EdgePlayerController.h"
+#include "Edge_TheGame/GameMode/EdgeGameMode.h"
+#include "Edge_TheGame/Character/EdgeCharacter.h"
 
 void AEdgeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -71,5 +73,23 @@ void AEdgeGameState::OnRep_BlueTeamScore()
 	{
 		EdgePlayerController->SetHUDBlueTeamScore(BlueTeamScore);
 	}
+}
+
+void AEdgeGameState::MultiCastFinishGame_Implementation()
+{
+	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
+	if (EdgeGameMode)
+	{
+		EdgeGameMode->FinishGame();
+	}
+}
+
+void AEdgeGameState::ServerFinishGame_Implementation()
+{
+	if (HasAuthority())
+	{
+		MultiCastFinishGame();
+	}
+	
 }
 

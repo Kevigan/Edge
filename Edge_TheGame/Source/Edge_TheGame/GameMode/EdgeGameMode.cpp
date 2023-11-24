@@ -19,6 +19,8 @@ AEdgeGameMode::AEdgeGameMode()
 	bDelayedStart = true;
 }
 
+
+
 void AEdgeGameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -62,6 +64,13 @@ void AEdgeGameMode::Tick(float DeltaTime)
 		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("GameModeServerCountdown: %f"), CountDownTime));
 	}
 	
+}
+
+void AEdgeGameMode::FinishGame()
+{
+	SetMatchState(MatchState::Cooldown);
+	MatchTime = 0.f;
+	OnMatchStateSet();
 }
 
 void AEdgeGameMode::OnMatchStateSet()

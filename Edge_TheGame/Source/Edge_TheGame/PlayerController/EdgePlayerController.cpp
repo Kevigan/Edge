@@ -170,6 +170,14 @@ void AEdgePlayerController::SetHUDRedTeamScore(int32 RedScore)
 		FString ScoreText = FString::Printf(TEXT("%d"), RedScore);
 		EdgeHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreText));
 	}
+
+	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+	if (EdgeGameState && EdgeGameState->RedTeamScore >= 30.f && !HasAuthority())
+	{
+		ServerFinishGame();
+		CooldownTime = 0.f;
+		MatchTime = 0.f;
+	}
 }
 
 void AEdgePlayerController::SetHUDBlueTeamScore(int32 BlueScore)
@@ -183,6 +191,14 @@ void AEdgePlayerController::SetHUDBlueTeamScore(int32 BlueScore)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), BlueScore);
 		EdgeHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreText));
+	}
+
+	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+	if (EdgeGameState && EdgeGameState->BlueTeamScore >= 30.f && !HasAuthority())
+	{
+		ServerFinishGame();
+		CooldownTime = 0.f;
+		MatchTime = 0.f;
 	}
 }
 
@@ -435,11 +451,7 @@ void AEdgePlayerController::SetHUDTime()
 		EdgeGameMode = EdgeGameMode == nullptr ? Cast<AEdgeGameMode>(UGameplayStatics::GetGameMode(this)) : EdgeGameMode;
 		if (EdgeGameMode)
 		{
-			//SecondsLeft = FMath::CeilToInt(EdgeGameMode->GetCountdownTime()/* + EdgeGameMode->LevelStartingTime*/);
 			levelStartingTime = EdgeGameMode->LevelStartingTime;
-			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("gameModeStartingTime: %f"), EdgeGameMode->LevelStartingTime));
-			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("ServerlevelStartingTime: %f"), levelStartingTime));
-			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("MatchState: %s"), *MatchState.ToString()));
 		}
 	}
 	float TimeLeft = 0.f;
@@ -484,6 +496,23 @@ void AEdgePlayerController::PollInit()
 			}
 		}
 	}
+}
+
+void AEdgePlayerController::ServerFinishGame_Implementation()
+{
+	MultiCastFinishGame();
+}
+
+void AEdgePlayerController::MultiCastFinishGame_Implementation()
+{
+	if (HasAuthority())
+	{
+	}
+		AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+		if (EdgeGameState)
+		{
+			EdgeGameState->ServerFinishGame();
+		}
 }
 
 void AEdgePlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
@@ -579,13 +608,15 @@ void AEdgePlayerController::HandleCooldown()
 		if (bHUDValid)
 		{
 			EdgeHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
-			FString AnnouncementText("New Match Starts In:");
+			FString AnnouncementText("Game Finished!");
 			EdgeHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 
 			AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
 			AEdgePlayerState* EdgePlayerState = GetPlayerState<AEdgePlayerState>();
 			if (EdgeGameState && EdgePlayerState)
 			{
+				//MatchTime = 0.f;
+
 				TArray<AEdgePlayerState*> TopPlayers = EdgeGameState->TopScoringPlayers;
 				FString InfoTextString;
 				if (TopPlayers.Num() == 0)

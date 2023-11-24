@@ -45,7 +45,14 @@ public:
 	UFUNCTION()
 		void OnRep_BlueTeamScore();
 
+	UFUNCTION(Server, Reliable)
+		void ServerFinishGame();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MultiCastFinishGame();
+
 protected:
+	class AEdgeGameMode* EdgeGameMode = nullptr;
 
 private:
 	float TopScore = 0.f;

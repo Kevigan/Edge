@@ -57,6 +57,12 @@ protected:
 	void SetHUDTime();
 	void PollInit();
 
+	UFUNCTION(Server, Reliable)
+		void ServerFinishGame();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MultiCastFinishGame();
+
 	/// <summary>
 	/// Sync time between client and server
 	/// </summary>
