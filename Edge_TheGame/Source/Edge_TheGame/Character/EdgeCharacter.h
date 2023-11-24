@@ -44,10 +44,10 @@ public:
 		bool bDisableGameplay = false;
 
 	//Change crosshair color on hit and on death
-	void ChangeCrosshairColor(float EnemyHealth);
+	void ChangeCrosshairColor(float EnemyHealth, AEdgeCharacter* DamagedCharacter, float DamageNum);
 
 	UFUNCTION(Client, Reliable)
-		void ClientChangeCrosshairColor(float EnemyHealth);
+		void ClientChangeCrosshairColor(float EnemyHealth, AEdgeCharacter* DamagedCharacter, float DamageNum);
 
 	FTimerHandle CrosshairTimer;
 	void CrosshairTimerFinished();
@@ -161,6 +161,8 @@ protected:
 	void AimButtonReleased();
 	void TabButtonPressed();
 	void TabButtonReleased();
+	void SprintButtonPressed();
+	void SprintButtonReleased();
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
 	void SimProxiesTurn();
@@ -219,6 +221,12 @@ protected:
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 	void RotateInPlace(float DeltaTime);
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		float SprintSpeed = 750;
+
+	float EdgeWalkSpeed;
+
 private:
 	class AEdge_HUD* HUD;
 

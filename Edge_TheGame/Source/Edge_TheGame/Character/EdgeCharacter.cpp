@@ -253,6 +253,8 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Pressed, this, &ThisClass::TabButtonPressed);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Released, this, &ThisClass::TabButtonReleased);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ThisClass::SprintButtonPressed);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ThisClass::SprintButtonReleased);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
@@ -306,11 +308,11 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 
 			if (!EdgeCharacterEnemy->IsLocallyControlled())
 			{
-				EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
+				EdgeCharacterEnemy->ClientChangeCrosshairColor(Health, this, Damage);
 			}
 			else
 			{
-				EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+				EdgeCharacterEnemy->ChangeCrosshairColor(Health, this, Damage);
 			}
 		}
 
@@ -331,11 +333,11 @@ void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDam
 				{
 					if (!EdgeCharacterEnemy->IsLocallyControlled())
 					{
-						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health);
+						EdgeCharacterEnemy->ClientChangeCrosshairColor(Health, this, Damage);
 					}
 					else
 					{
-						EdgeCharacterEnemy->ChangeCrosshairColor(Health);
+						EdgeCharacterEnemy->ChangeCrosshairColor(Health, this, Damage);
 					}
 				}
 			}
@@ -813,6 +815,17 @@ void AEdgeCharacter::TabButtonReleased()
 	}
 }
 
+void AEdgeCharacter::SprintButtonPressed()
+{
+	EdgeWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AEdgeCharacter::SprintButtonReleased()
+{
+	GetCharacterMovement()->MaxWalkSpeed = EdgeWalkSpeed;
+}
+
 void AEdgeCharacter::ServerTabPressed_Implementation()
 {
 	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(GetWorld()->GetGameState());
@@ -1123,21 +1136,29 @@ void AEdgeCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth)
+void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth, AEdgeCharacter* DamagedCharacter, float DamageNum)
 {
 	FColor Color = FColor::White;
 	float Time = 0.f;
 
+	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
 	if (EnemyHealth > 0.f)
 	{
 		Color = FColor::Purple;
 		Time = 0.3f;
+		if (HUD && DamagedCharacter)
+		{
+			HUD->ReceiveOnShowHitNumbers(DamagedCharacter, DamageNum);
+		}
 	}
 	else
 	{
 		Color = FColor::Red;
 		Time = 0.8f;
-
+		if (HUD && DamagedCharacter)
+		{
+			HUD->ReceiveOnShowDeathUI(DamagedCharacter);
+		}
 	}
 
 	if (Combat && Combat->EquippedWeapon)
@@ -1152,9 +1173,9 @@ void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth)
 	);
 }
 
-void AEdgeCharacter::ClientChangeCrosshairColor_Implementation(float EnemyHealth)
+void AEdgeCharacter::ClientChangeCrosshairColor_Implementation(float EnemyHealth, AEdgeCharacter* DamagedCharacter, float DamageNum)
 {
-	ChangeCrosshairColor(EnemyHealth);
+	ChangeCrosshairColor(EnemyHealth, DamagedCharacter, DamageNum);
 	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("Health: %f"), EnemyHealth));
 }
 

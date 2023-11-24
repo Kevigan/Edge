@@ -69,6 +69,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
 		void ReceiveOnShowHitUI();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
+		void ReceiveOnShowHitNumbers(AEdgeCharacter* DamagedCharacter, float Damage);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
+		void ReceiveOnShowDeathUI(AEdgeCharacter* DamagedCharacter);
+
 	void AddCharacterOverlay();
 
 	UPROPERTY()
