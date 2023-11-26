@@ -26,4 +26,7 @@ public:
 		
 	UPROPERTY(meta = (BindWidget))
 		UTextBlock* WinnerTeamInfoText;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool bTeamWon = false;
 };

@@ -49,6 +49,9 @@ public:
 	void SetHUDRedTeamScore(int32 RedScore);
 	void SetHUDBlueTeamScore(int32 BlueScore);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnTeamWin();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -103,6 +106,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_ShowTeamsScores();
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		int32 NumberOfKillsNeededToWin = 1;
 
 private:
 	UPROPERTY()

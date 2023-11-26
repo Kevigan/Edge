@@ -146,6 +146,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		int32 InvertedLookMultiplyer = 1;
 
+	UPROPERTY(BlueprintReadWrite)
+		float MouseSensitivity = 1.f;
+
 protected:
 	virtual void BeginPlay() override;
 

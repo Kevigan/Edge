@@ -78,6 +78,7 @@ void AEdgeGameState::OnRep_BlueTeamScore()
 void AEdgeGameState::MultiCastFinishGame_Implementation()
 {
 	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
+
 	if (EdgeGameMode)
 	{
 		EdgeGameMode->FinishGame();

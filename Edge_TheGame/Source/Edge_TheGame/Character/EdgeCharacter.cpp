@@ -657,13 +657,13 @@ void AEdgeCharacter::MoveRight(float Value)
 
 void AEdgeCharacter::Turn(float Value)
 {
-	AddControllerYawInput(Value);
+	AddControllerYawInput(Value * MouseSensitivity);
 	ControllerYaw = Value;
 }
 
 void AEdgeCharacter::LookUp(float Value)
 {
-	AddControllerPitchInput(Value * InvertedLookMultiplyer);
+	AddControllerPitchInput(Value * InvertedLookMultiplyer * MouseSensitivity);
 }
 
 void AEdgeCharacter::MouseWheelTurned()

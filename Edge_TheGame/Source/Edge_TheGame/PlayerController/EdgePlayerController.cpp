@@ -172,7 +172,7 @@ void AEdgePlayerController::SetHUDRedTeamScore(int32 RedScore)
 	}
 
 	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
-	if (EdgeGameState && EdgeGameState->RedTeamScore >= 30.f && !HasAuthority())
+	if (EdgeGameState && EdgeGameState->RedTeamScore >= NumberOfKillsNeededToWin && !HasAuthority())
 	{
 		ServerFinishGame();
 		CooldownTime = 0.f;
@@ -194,7 +194,7 @@ void AEdgePlayerController::SetHUDBlueTeamScore(int32 BlueScore)
 	}
 
 	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
-	if (EdgeGameState && EdgeGameState->BlueTeamScore >= 30.f && !HasAuthority())
+	if (EdgeGameState && EdgeGameState->BlueTeamScore >= NumberOfKillsNeededToWin && !HasAuthority())
 	{
 		ServerFinishGame();
 		CooldownTime = 0.f;
@@ -616,7 +616,6 @@ void AEdgePlayerController::HandleCooldown()
 			if (EdgeGameState && EdgePlayerState)
 			{
 				//MatchTime = 0.f;
-
 				TArray<AEdgePlayerState*> TopPlayers = EdgeGameState->TopScoringPlayers;
 				FString InfoTextString;
 				if (TopPlayers.Num() == 0)
@@ -640,22 +639,32 @@ void AEdgePlayerController::HandleCooldown()
 					}
 				}
 				EdgeHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
+				ETeam WinningTeam;
 
 				FString WinnerTeamInfoTextString;
 				if (EdgeGameState->RedTeamScore > EdgeGameState->BlueTeamScore)
 				{
 					WinnerTeamInfoTextString = FString("Red Team Won!");
 					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255,0,0,255));
+					WinningTeam = ETeam::ET_RedTeam;
 				}
 				else if (EdgeGameState->RedTeamScore < EdgeGameState->BlueTeamScore)
 				{
 					WinnerTeamInfoTextString = FString("Blue Team Won!");
 					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(0, 0, 255, 255));
+					WinningTeam = ETeam::ET_BlueTeam;
 				}
 				else
 				{
 					WinnerTeamInfoTextString = FString("Both Teams Tied!");
 					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255, 255, 255, 255));
+					WinningTeam = ETeam::ET_NoTeam;
+				}
+
+				if (EdgePlayerState->GetTeam() == WinningTeam)
+				{
+					EdgeHUD->Announcement->bTeamWon = true;
+					OnTeamWin();
 				}
 
 				EdgeHUD->Announcement->WinnerTeamInfoText->SetText(FText::FromString(WinnerTeamInfoTextString));
