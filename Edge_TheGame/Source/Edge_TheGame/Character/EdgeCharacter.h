@@ -329,9 +329,6 @@ private:
 
 	bool bLeftGame = false;
 
-
-
-
 	// Poll for any relevant classes and initialize our HUD
 	void PollInit();
 
@@ -347,6 +344,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<AWeapon> DefaultWeaponClass;
 
+	UPROPERTY(EditAnywhere, Category = Config)
+		class USoundCue* HitSoundBody;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		class USoundCue* DeathSound;
 
 	/*
 	* Team Colors

@@ -25,7 +25,7 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
 
-	
+
 }
 
 void AProjectile::BeginPlay()
@@ -42,6 +42,11 @@ void AProjectile::BeginPlay()
 			GetActorRotation(),
 			EAttachLocation::KeepWorldPosition
 		);
+	}
+
+	if (ImpactSound)
+	{
+		ChosenImpactSound = ImpactSound;
 	}
 
 	if (HasAuthority())
@@ -61,6 +66,10 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	if (Hit.GetActor() && Hit.GetActor()->IsA<AEdgeCharacter>())
 	{
 		ReceiveOnHitBodyProjectile(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+		if (ImpactSoundBody)
+		{
+			ChosenImpactSound = ImpactSoundBody;
+		}
 	}
 	Destroy();
 }
@@ -73,9 +82,9 @@ void AProjectile::Destroyed()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	if (ImpactSound)
+	if (ChosenImpactSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, ChosenImpactSound, GetActorLocation());
 	}
 }
 

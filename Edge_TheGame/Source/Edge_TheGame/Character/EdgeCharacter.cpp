@@ -26,6 +26,7 @@
 #include "Components/BoxComponent.h"
 #include "Edge_TheGame/PlayerStart/TeamPlayerStart.h"
 #include "Edge_TheGame/GameState/EdgeGameState.h"
+#include "Sound/SoundCue.h"
 
 AEdgeCharacter::AEdgeCharacter()
 {
@@ -580,12 +581,6 @@ void AEdgeCharacter::SpawnMiniMap()
 			FRotator(0.f, 0.f, 0.f),
 			SpawnParams
 		);
-		if (MiniMapActor)
-		{
-			//MiniMapActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
-			//MiniMapActor->AttachToComponent(CameraBoom, FAttachmentTransformRules(EAttachmentRule::KeepWorld, false));
-			//MiniMapActor->SetActorRelativeLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 100.f));
-		}
 	}
 
 	HUD = HUD == nullptr ? Cast<AEdge_HUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD()) : HUD;
@@ -1150,6 +1145,14 @@ void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth, AEdgeCharacter* Dam
 		{
 			HUD->ReceiveOnShowHitNumbers(DamagedCharacter, DamageNum);
 		}
+		if (HitSoundBody)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				HitSoundBody,
+				GetActorLocation()
+			);
+		}
 	}
 	else
 	{
@@ -1158,6 +1161,14 @@ void AEdgeCharacter::ChangeCrosshairColor(float EnemyHealth, AEdgeCharacter* Dam
 		if (HUD && DamagedCharacter)
 		{
 			HUD->ReceiveOnShowDeathUI(DamagedCharacter);
+		}
+		if (DeathSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				DeathSound,
+				GetActorLocation()
+			);
 		}
 	}
 

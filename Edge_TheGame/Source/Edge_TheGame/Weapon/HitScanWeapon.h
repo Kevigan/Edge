@@ -29,6 +29,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Config)
 		class USoundCue* HitSound;
 
+	UPROPERTY(EditAnywhere, Category = Config)
+		class USoundCue* HitSoundBody;
+
 
 private:
 	UPROPERTY(EditAnywhere, Category = Config)

@@ -41,9 +41,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 		class UProjectileMovementComponent* ProjectileMovementComponent = nullptr;
 
-private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UBoxComponent* CollisionBox = nullptr;
+private:
 
 	UPROPERTY()
 		class UParticleSystemComponent* TracerComponent = nullptr;
@@ -56,6 +56,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = Config)
+		USoundCue* ImpactSoundBody;
+
+	USoundCue* ChosenImpactSound;
 
 
 public:
