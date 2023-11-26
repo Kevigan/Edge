@@ -80,6 +80,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void FinishSwapAttachWeapons();
 
+	
+
 	int32 AmountToReload();
 
 	void DropEquippedWeapon();
@@ -153,7 +155,7 @@ private:
 	/// </summary>
 
 	FTimerHandle FireTimer;
-	
+
 	bool bCanFire = true;
 
 	void StartFireTimer();

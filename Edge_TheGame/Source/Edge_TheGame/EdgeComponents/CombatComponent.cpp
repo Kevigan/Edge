@@ -593,13 +593,17 @@ void UCombatComponent::ServerReload_Implementation()
 	{
 		HandleReload();
 	}
+	if (Character->HasAuthority() && Character->IsLocallyControlled())
+	{
+		Character->ReceiveOnReload();
+	}
 }
 
 void UCombatComponent::FinishReloading()
 {
 	if (Character == nullptr) return;
 	bLocallyReloading = false;
-
+	Character->ReceiveOnReloadFinish();
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
@@ -616,7 +620,6 @@ void UCombatComponent::HandleReload()
 	if (Character)
 	{
 		Character->PlayReloadMontage();
-
 	}
 }
 
@@ -669,7 +672,14 @@ void UCombatComponent::OnRep_CombatState()
 		}
 		break;
 	case ECombatState::ECS_Reloading:
-		if (Character && !Character->IsLocallyControlled()) HandleReload();
+		if (Character && !Character->IsLocallyControlled())
+		{
+			HandleReload();
+		}
+		if (Character && Character->IsLocallyControlled() && !Character->HasAuthority())
+		{
+			Character->ReceiveOnReload();
+		}
 		break;
 
 	case ECombatState::ECS_SwappingWeapons:

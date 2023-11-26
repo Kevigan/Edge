@@ -386,6 +386,7 @@ void AEdgeCharacter::PlayReloadMontage()
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+
 }
 
 void AEdgeCharacter::Elim(bool bPlayerLeftGame)
@@ -522,6 +523,7 @@ void AEdgeCharacter::PlayElimMontage()
 	if (AnimInstance && ElimMontage)
 	{
 		AnimInstance->Montage_Play(ElimMontage);
+		ReceiveOnElimmed();
 	}
 }
 

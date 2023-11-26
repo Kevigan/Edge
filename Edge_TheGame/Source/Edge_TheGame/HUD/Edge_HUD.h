@@ -112,4 +112,7 @@ private:
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+
+	UFUNCTION(BlueprintCallable)
+		UCharacterOverlay* GetCharacterOverlay(){return CharacterOverlay;}
 };

@@ -149,6 +149,15 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		float MouseSensitivity = 1.f;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnReload();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnReloadFinish();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnElimmed();
+
 protected:
 	virtual void BeginPlay() override;
 
