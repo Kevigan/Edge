@@ -252,6 +252,8 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ThisClass::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ThisClass::FireButtonReleased);
 	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ThisClass::MouseWheelTurned);
+	PlayerInputComponent->BindAction("Swap1", IE_Pressed, this, &ThisClass::MouseWheelTurned);
+	PlayerInputComponent->BindAction("Swap2", IE_Pressed, this, &ThisClass::MouseWheelTurned);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Pressed, this, &ThisClass::TabButtonPressed);
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Released, this, &ThisClass::TabButtonReleased);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ThisClass::SprintButtonPressed);
