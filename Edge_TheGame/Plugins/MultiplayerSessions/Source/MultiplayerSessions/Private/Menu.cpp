@@ -75,6 +75,10 @@ bool UMenu::Initialize()
 	{
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
+	if (LootButton)
+	{
+		LootButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
+	}
 
 	return true;
 }
@@ -107,7 +111,7 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString(TEXT("Failed to create session!")));
 		}
-		HostButton->SetIsEnabled(true);
+		EnableAllHostAndJoin();
 	}
 }
 
@@ -131,7 +135,7 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 	}
 	if (!bWasSuccessful || SessionResults.Num() == 0)
 	{
-		JoinButton->SetIsEnabled(true);
+		EnableAllHostAndJoin();
 	}
 }
 
@@ -155,7 +159,7 @@ void UMenu::OnJoinSessions(EOnJoinSessionCompleteResult::Type Result)
 	}
 	if (Result != EOnJoinSessionCompleteResult::Success)
 	{
-		JoinButton->SetIsEnabled(true);
+		EnableAllHostAndJoin();
 	}
 }
 
@@ -169,7 +173,7 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 
 void UMenu::HostButtonClicked()
 {
-	HostButton->SetIsEnabled(false);
+	DisableAllHostAndJoin();
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
@@ -180,7 +184,7 @@ void UMenu::HostButtonClicked()
 void UMenu::Sammy1Clicked()
 {
 
-	HostSammy1->SetIsEnabled(false);
+	DisableAllHostAndJoin();
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
@@ -190,7 +194,7 @@ void UMenu::Sammy1Clicked()
 
 void UMenu::Sammy2Clicked()
 {
-	HostSammy2->SetIsEnabled(false);
+	DisableAllHostAndJoin();
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
@@ -200,7 +204,7 @@ void UMenu::Sammy2Clicked()
 
 void UMenu::Nico1Clicked()
 {
-	HostNico1->SetIsEnabled(false);
+	DisableAllHostAndJoin();
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
@@ -210,7 +214,7 @@ void UMenu::Nico1Clicked()
 
 void UMenu::JoinButtonClicked()
 {
-	JoinButton->SetIsEnabled(false);
+	DisableAllHostAndJoin();
 	if (MultiplayerSessionsSubsystem)
 	{
 		MultiplayerSessionsSubsystem->FindSessions(10000);
@@ -231,4 +235,24 @@ void UMenu::MenuTearDown()
 			PlayerController->SetShowMouseCursor(false);
 		}
 	}
+}
+
+void UMenu::DisableAllHostAndJoin()
+{
+	JoinButton->SetIsEnabled(false);
+	HostNico1->SetIsEnabled(false);
+	HostSammy2->SetIsEnabled(false);
+	HostSammy1->SetIsEnabled(false);
+	HostButton->SetIsEnabled(false);
+	LootButton->SetIsEnabled(false);
+}
+
+void UMenu::EnableAllHostAndJoin()
+{
+	JoinButton->SetIsEnabled(true);
+	HostNico1->SetIsEnabled(true);
+	HostSammy2->SetIsEnabled(true);
+	HostSammy1->SetIsEnabled(true);
+	HostButton->SetIsEnabled(true);
+	LootButton->SetIsEnabled(true);
 }

@@ -53,6 +53,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* JoinButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* LootButton;
+
 	UFUNCTION()
 	void HostButtonClicked();
 
@@ -69,6 +72,9 @@ private:
 	void JoinButtonClicked();
 
 	void MenuTearDown();
+
+	void DisableAllHostAndJoin();
+	void EnableAllHostAndJoin();
 
 	// The subsystem designed to handle all online session functionallity
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;

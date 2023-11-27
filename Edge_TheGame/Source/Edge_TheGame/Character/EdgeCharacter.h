@@ -23,6 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode,uint8 PreviousCustomMode) override;
 	virtual void Destroyed() override;
 
 	/*
@@ -239,6 +240,12 @@ protected:
 
 	float EdgeWalkSpeed;
 
+	bool bCanCoyoteJump = false;
+	FTimerHandle CoyoteJumpTimer;
+	void CoyoteJumpFinished();
+	UPROPERTY(EditAnywhere, Category = Config = Movement)
+		float CoyoteJumpDelay = 0.2f;
+
 private:
 	class AEdge_HUD* HUD;
 
@@ -374,6 +381,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class AEdgeGameMode* EdgeGameMode;
+
+	
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

@@ -43,6 +43,7 @@ AEdgeCharacter::AEdgeCharacter()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 
 	OverHeadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverHeadWidget"));
 	OverHeadWidget->SetupAttachment(RootComponent);
@@ -289,6 +290,28 @@ void AEdgeCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
+}
+
+void AEdgeCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+	if (PrevMovementMode == EMovementMode::MOVE_Walking)
+	{
+		bCanCoyoteJump = true;
+		JumpMaxCount += 1;
+		GetWorldTimerManager().SetTimer(
+			CoyoteJumpTimer,
+			this,
+			&ThisClass::CoyoteJumpFinished,
+			CoyoteJumpDelay
+		);
+	}
+}
+
+void AEdgeCharacter::CoyoteJumpFinished()
+{
+	JumpMaxCount -= 1;
+	bCanCoyoteJump = false;
 }
 
 void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
@@ -933,15 +956,16 @@ void AEdgeCharacter::SimProxiesTurn()
 
 void AEdgeCharacter::Jump()
 {
-	if (bDisableGameplay) return;
-	if (bIsCrouched)
+	if (bDisableGameplay || bIsCrouched) return;
+	/*if (bIsCrouched)
 	{
 		UnCrouch();
 	}
 	else
 	{
-		Super::Jump();
-	}
+
+	}*/
+	Super::Jump();
 }
 
 void AEdgeCharacter::FireButtonPressed()
