@@ -43,6 +43,7 @@ AEdgeCharacter::AEdgeCharacter()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 
 	OverHeadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverHeadWidget"));
 	OverHeadWidget->SetupAttachment(RootComponent);
@@ -289,6 +290,11 @@ void AEdgeCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
+}
+
+void AEdgeCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	GEngine->AddOnScreenDebugMessage(-1,2.f,FColor::Red, FString::Printf(TEXT("PrevMovementMode: %s"), *UEnum::GetValueAsString(PrevMovementMode)));
 }
 
 void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
@@ -933,15 +939,16 @@ void AEdgeCharacter::SimProxiesTurn()
 
 void AEdgeCharacter::Jump()
 {
-	if (bDisableGameplay) return;
-	if (bIsCrouched)
+	if (bDisableGameplay || bIsCrouched) return;
+	/*if (bIsCrouched)
 	{
 		UnCrouch();
 	}
 	else
 	{
+
+	}*/
 		Super::Jump();
-	}
 }
 
 void AEdgeCharacter::FireButtonPressed()

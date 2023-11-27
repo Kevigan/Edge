@@ -79,15 +79,8 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			}
 
 		}
-		/*if (FireHit.GetActor() && FireHit.GetActor()->IsA<AEdgeCharacter>() && HitSoundBody)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				HitSoundBody,
-				GetActorLocation()
-			);
-		}
-		else */if(HitSound)
+
+		if(HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(
 				this,

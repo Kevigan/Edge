@@ -23,6 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode,uint8 PreviousCustomMode) override;
 	virtual void Destroyed() override;
 
 	/*
