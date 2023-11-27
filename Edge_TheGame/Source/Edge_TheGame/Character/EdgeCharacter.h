@@ -240,6 +240,12 @@ protected:
 
 	float EdgeWalkSpeed;
 
+	bool bCanCoyoteJump = false;
+	FTimerHandle CoyoteJumpTimer;
+	void CoyoteJumpFinished();
+	UPROPERTY(EditAnywhere, Category = Config = Movement)
+		float CoyoteJumpDelay = 0.2f;
+
 private:
 	class AEdge_HUD* HUD;
 
@@ -375,6 +381,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class AEdgeGameMode* EdgeGameMode;
+
+	
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

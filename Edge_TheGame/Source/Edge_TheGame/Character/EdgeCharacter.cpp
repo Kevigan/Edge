@@ -294,7 +294,24 @@ void AEdgeCharacter::OnRep_ReplicatedMovement()
 
 void AEdgeCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
-	GEngine->AddOnScreenDebugMessage(-1,2.f,FColor::Red, FString::Printf(TEXT("PrevMovementMode: %s"), *UEnum::GetValueAsString(PrevMovementMode)));
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+	if (PrevMovementMode == EMovementMode::MOVE_Walking)
+	{
+		bCanCoyoteJump = true;
+		JumpMaxCount += 1;
+		GetWorldTimerManager().SetTimer(
+			CoyoteJumpTimer,
+			this,
+			&ThisClass::CoyoteJumpFinished,
+			CoyoteJumpDelay
+		);
+	}
+}
+
+void AEdgeCharacter::CoyoteJumpFinished()
+{
+	JumpMaxCount -= 1;
+	bCanCoyoteJump = false;
 }
 
 void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
@@ -948,7 +965,7 @@ void AEdgeCharacter::Jump()
 	{
 
 	}*/
-		Super::Jump();
+	Super::Jump();
 }
 
 void AEdgeCharacter::FireButtonPressed()
