@@ -197,4 +197,10 @@ public:
 	void SetCrossHairCOlor(FLinearColor color) { ColorToChange = color; }
 	bool ShouldSwapWeapons();
 
+	UFUNCTION(BlueprintCallable)
+		AWeapon* GetEquippedWeapon() {return EquippedWeapon;}
+		
+	UFUNCTION(BlueprintCallable)
+		AWeapon* GetSecondaryWeapon() {return SecondaryWeapon;}
+
 };
