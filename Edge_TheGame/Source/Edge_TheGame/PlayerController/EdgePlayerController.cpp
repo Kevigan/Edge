@@ -508,11 +508,11 @@ void AEdgePlayerController::MultiCastFinishGame_Implementation()
 	if (HasAuthority())
 	{
 	}
-		AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
-		if (EdgeGameState)
-		{
-			EdgeGameState->ServerFinishGame();
-		}
+	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(UGameplayStatics::GetGameState(this));
+	if (EdgeGameState)
+	{
+		EdgeGameState->ServerFinishGame();
+	}
 }
 
 void AEdgePlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
@@ -645,7 +645,7 @@ void AEdgePlayerController::HandleCooldown()
 				if (EdgeGameState->RedTeamScore > EdgeGameState->BlueTeamScore)
 				{
 					WinnerTeamInfoTextString = FString("Red Team Won!");
-					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255,0,0,255));
+					EdgeHUD->Announcement->WinnerTeamInfoText->SetColorAndOpacity(FLinearColor(255, 0, 0, 255));
 					WinningTeam = ETeam::ET_RedTeam;
 				}
 				else if (EdgeGameState->RedTeamScore < EdgeGameState->BlueTeamScore)

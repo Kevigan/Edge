@@ -84,7 +84,6 @@ void AEdgeGameMode::OnMatchStateSet()
 		{
 			EdgePlayerController->OnMatchStateSet(MatchState, bTeamsMatch);
 			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString(TEXT("OnMatchStateSet")));
-
 		}
 	}
 }
