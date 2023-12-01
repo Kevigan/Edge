@@ -259,6 +259,7 @@ void AEdgeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("ShowTeamData", IE_Released, this, &ThisClass::TabButtonReleased);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ThisClass::SprintButtonPressed);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ThisClass::SprintButtonReleased);
+	PlayerInputComponent->BindAction("StealthMode", IE_Pressed, this, &ThisClass::StealthModeButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
@@ -854,6 +855,11 @@ void AEdgeCharacter::SprintButtonReleased()
 	GetCharacterMovement()->MaxWalkSpeed = EdgeWalkSpeed;
 }
 
+void AEdgeCharacter::StealthModeButtonPressed()
+{
+	Server_StealthMode();
+}
+
 void AEdgeCharacter::ServerTabPressed_Implementation()
 {
 	AEdgeGameState* EdgeGameState = Cast<AEdgeGameState>(GetWorld()->GetGameState());
@@ -1142,6 +1148,17 @@ void AEdgeCharacter::Server_ChangeSkin_Implementation(const FString& Skin)
 		//OverlappingWeapon->Test(this);
 		OverlappingWeapon->Multicast_ChangeSKin(Skin);
 	}
+}
+
+void AEdgeCharacter::Server_StealthMode_Implementation()
+{
+	Multicast_StealthMode();
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("asdqwe")));
+}
+
+void AEdgeCharacter::Multicast_StealthMode_Implementation()
+{
+	ReceiveOnStealthMode();
 }
 
 void AEdgeCharacter::SetOverlappingWeapon(AWeapon* Weapon)

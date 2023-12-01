@@ -176,6 +176,7 @@ protected:
 	void TabButtonReleased();
 	void SprintButtonPressed();
 	void SprintButtonReleased();
+	void StealthModeButtonPressed();
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
 	void SimProxiesTurn();
@@ -247,6 +248,15 @@ protected:
 	void CoyoteJumpFinished();
 	UPROPERTY(EditAnywhere, Category = Config = Movement)
 		float CoyoteJumpDelay = 0.2f;
+
+	UFUNCTION(Server, Reliable)
+		void Server_StealthMode();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_StealthMode();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnStealthMode();
 
 private:
 	class AEdge_HUD* HUD;
@@ -386,6 +396,8 @@ private:
 
 	UFUNCTION(Server, Reliable)
 		void Server_ChangeSkin(const FString& Skin);
+
+	
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

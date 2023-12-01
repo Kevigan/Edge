@@ -123,9 +123,9 @@ public:
 		void Multicast_ChangeSKin(const FString& Skin);
 
 	UFUNCTION()
-	void Test(AEdgeCharacter* OwnerCHar);
+		void Test(AEdgeCharacter* OwnerCHar);
 
-		UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent)
 		void ReceiveTEST();
 
 	FString GetCurrentSkinWeaponType();
