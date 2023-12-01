@@ -12,6 +12,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Edge_TheGame/PlayerController/EdgePlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Edge_TheGame/EdgeGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -55,8 +57,8 @@ void AWeapon::BeginPlay()
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	
+
+
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -65,6 +67,50 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);
+}
+
+
+void AWeapon::Server_ChangeSkin_Implementation(const FString& Skin)
+{
+	Multicast_ChangeSKin(Skin);
+	ReceiveTEST();
+}
+
+void AWeapon::Multicast_ChangeSKin_Implementation(const FString& Skin)
+{
+	ReceiveOnEquipped(Skin);
+}
+
+void AWeapon::Test(AEdgeCharacter* OwnerCHar)
+{
+	if (OwnerCHar && OwnerCHar->IsLocallyControlled())
+	{
+		Server_ChangeSkin(GetCurrentSkinWeaponType());
+	}
+}
+
+FString AWeapon::GetCurrentSkinWeaponType()
+{
+	EdgeGameInstance = EdgeGameInstance == nullptr ? Cast<UEdgeGameInstance>(UGameplayStatics::GetGameInstance(this)) : EdgeGameInstance;
+	if (EdgeGameInstance)
+	{
+		switch (WeaponType)
+		{
+		case EWeaponType::EWT_Pistol:
+			return EdgeGameInstance->CurrentPistolString;
+			break;
+		case EWeaponType::EWT_Shotgun:
+			return EdgeGameInstance->CurrentShotgunString;
+			break;
+		case EWeaponType::EWT_AssaulRifle:
+			return EdgeGameInstance->CurrentRifleString;
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			return EdgeGameInstance->CurrentSniperString;
+			break;
+		}
+	}
+	return FString();
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -153,6 +199,7 @@ void AWeapon::OnRep_Owner()
 		if (EdgeOwnerCharacter && EdgeOwnerCharacter->GetEquippedWeapon() && EdgeOwnerCharacter->GetEquippedWeapon() == this)
 		{
 			SetHUDAmmo();
+
 		}
 	}
 }
@@ -205,6 +252,11 @@ void AWeapon::OnEquipped()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	/*if (EdgeOwnerCharacter)
+	{
+		Server_ChangeSkin(GetCurrentSkinWeaponType());
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("asdqwe")));
+	}*/
 	if (EdgeOwnerCharacter && bUseServerSideRewind)
 	{
 		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
@@ -213,7 +265,7 @@ void AWeapon::OnEquipped()
 			EdgeOwnerController->HighPingDelegate.AddDynamic(this, &ThisClass::OnPingTooHigh);
 		}
 	}
-	ReceiveOnEquipped();
+	//ReceiveOnEquipped();
 }
 
 void AWeapon::OnEquippedSecondary()
@@ -225,6 +277,11 @@ void AWeapon::OnEquippedSecondary()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : EdgeOwnerCharacter;
+	/*if (EdgeOwnerCharacter)
+	{
+		Server_ChangeSkin(GetCurrentSkinWeaponType());
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("asdqwe")));
+	}*/
 	if (EdgeOwnerCharacter && bUseServerSideRewind)
 	{
 		EdgeOwnerController = EdgeOwnerController == nullptr ? Cast<AEdgePlayerController>(EdgeOwnerCharacter->Controller) : EdgeOwnerController;
@@ -233,7 +290,7 @@ void AWeapon::OnEquippedSecondary()
 			EdgeOwnerController->HighPingDelegate.RemoveDynamic(this, &ThisClass::OnPingTooHigh);
 		}
 	}
-	ReceiveOnEquipped();
+	//ReceiveOnEquipped();
 }
 
 void AWeapon::OnDropped()

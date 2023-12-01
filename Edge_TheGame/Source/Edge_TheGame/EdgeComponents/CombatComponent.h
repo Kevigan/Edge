@@ -80,8 +80,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void FinishSwapAttachWeapons();
 
-	
-
 	int32 AmountToReload();
 
 	void DropEquippedWeapon();
@@ -92,6 +90,15 @@ protected:
 	void ReloadEmptyWeapon();
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+
+	class UEdgeGameInstance* EdgeGameInstance;
+
+	
+
+	UFUNCTION(BlueprintCallable)
+		void OnClientJoinMidGame();
+
+	FString GetCurrentSkinWeaponType(EWeaponType CurrentWeaponType);
 
 private:
 	UPROPERTY()
@@ -198,9 +205,9 @@ public:
 	bool ShouldSwapWeapons();
 
 	UFUNCTION(BlueprintCallable)
-		AWeapon* GetEquippedWeapon() {return EquippedWeapon;}
-		
+		AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+
 	UFUNCTION(BlueprintCallable)
-		AWeapon* GetSecondaryWeapon() {return SecondaryWeapon;}
+		AWeapon* GetSecondaryWeapon() { return SecondaryWeapon; }
 
 };

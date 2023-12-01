@@ -15,6 +15,7 @@
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "Edge_TheGame/Weapon/ShotGun.h"
+#include "Edge_TheGame/EdgeGameInstance.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -297,7 +298,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
-		
+
 		HUDPackage.CrosshairsColor = ColorToChange;
 
 		if (!TraceHitResult.bBlockingHit) TraceHitResult.ImpactPoint = End;
@@ -489,6 +490,68 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	AttachActorToBackpack(WeaponToEquip);
 	PlayEquippedWeaponSound(WeaponToEquip);
 	SecondaryWeapon->SetOwner(Character);
+}
+
+void UCombatComponent::OnClientJoinMidGame()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Server_ChangeSkin(GetCurrentSkinWeaponType(EquippedWeapon->GetWeaponType()));
+	}
+
+	if (SecondaryWeapon)
+	{
+		SecondaryWeapon->Server_ChangeSkin(GetCurrentSkinWeaponType(SecondaryWeapon->GetWeaponType()));
+	}
+}
+
+FString UCombatComponent::GetCurrentSkinWeaponType(EWeaponType CurrentWeaponType)
+{
+	EdgeGameInstance = EdgeGameInstance == nullptr ? Cast<UEdgeGameInstance>(UGameplayStatics::GetGameInstance(this)) : EdgeGameInstance;
+	if (EdgeGameInstance)
+	{
+		switch (CurrentWeaponType)
+		{
+		case EWeaponType::EWT_Pistol:
+			return EdgeGameInstance->CurrentPistolString;
+			break;
+		case EWeaponType::EWT_Shotgun:
+			return EdgeGameInstance->CurrentShotgunString;
+			break;
+		case EWeaponType::EWT_AssaulRifle:
+			return EdgeGameInstance->CurrentRifleString;
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			return EdgeGameInstance->CurrentSniperString;
+			break;
+		}
+	}
+	return FString();
+}
+
+
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && Character)
+	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToRightHand(EquippedWeapon);
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+		PlayEquippedWeaponSound(EquippedWeapon);
+		EquippedWeapon->SetHUDAmmo();
+	}
+}
+
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if (SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+		AttachActorToBackpack(SecondaryWeapon);
+		PlayEquippedWeaponSound(SecondaryWeapon);
+	}
 }
 
 void UCombatComponent::OnRep_Aiming()
@@ -684,29 +747,6 @@ void UCombatComponent::OnRep_CombatState()
 
 	case ECombatState::ECS_MAX:
 		break;
-	}
-}
-
-void UCombatComponent::OnRep_EquippedWeapon()
-{
-	if (EquippedWeapon && Character)
-	{
-		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-		AttachActorToRightHand(EquippedWeapon);
-		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-		Character->bUseControllerRotationYaw = true;
-		PlayEquippedWeaponSound(EquippedWeapon);
-		EquippedWeapon->SetHUDAmmo();
-	}
-}
-
-void UCombatComponent::OnRep_SecondaryWeapon()
-{
-	if (SecondaryWeapon && Character)
-	{
-		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-		AttachActorToBackpack(SecondaryWeapon);
-		PlayEquippedWeaponSound(SecondaryWeapon);
 	}
 }
 

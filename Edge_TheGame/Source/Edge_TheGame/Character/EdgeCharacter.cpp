@@ -747,11 +747,17 @@ void AEdgeCharacter::EquipButtonPressed()
 
 	if (Combat->CombatState == ECombatState::ECS_Unoccupied)
 	{
+		if (OverlappingWeapon)
+		{
+			//OverlappingWeapon->Test(this);
+			Server_ChangeSkin(OverlappingWeapon->GetCurrentSkinWeaponType());
+		}
 		bJustFired = true;
 		StartFireTimer();
 		bJustEquipped = true;
 		StartEquipTimer();
 		ServerEquipButtonPressed(OverlappingWeapon);
+		//Combat->OnClientJoinMidGame();
 	}
 
 	if (Combat->ShouldSwapWeapons() && !HasAuthority() && OverlappingWeapon == nullptr)
@@ -1126,6 +1132,15 @@ void AEdgeCharacter::PollInit()
 			UpdateHUDAmmo();
 			UpdateHUDHealth();
 		}
+	}
+}
+
+void AEdgeCharacter::Server_ChangeSkin_Implementation(const FString& Skin)
+{
+	if (OverlappingWeapon)
+	{
+		//OverlappingWeapon->Test(this);
+		OverlappingWeapon->Multicast_ChangeSKin(Skin);
 	}
 }
 

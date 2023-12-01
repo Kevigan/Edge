@@ -28,6 +28,20 @@ enum class EFireType : uint8
 	EFT_MAX UMETA(DisplayName = "DedaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class ESkinType : uint8
+{
+	EFT_Common UMETA(DisplayName = "Common"),
+	EFT_UnCommon UMETA(DisplayName = "UnCommon"),
+	EFT_Rare UMETA(DisplayName = "Rare"),
+	EFT_Epic UMETA(DisplayName = "Epic"),
+	EFT_Legendary UMETA(DisplayName = "Legendary"),
+	EFT_Mythic UMETA(DisplayName = "Mythic"),
+
+	EFT_MAX UMETA(DisplayName = "DedaultMAX")
+};
+
+
 UCLASS()
 class EDGE_THEGAME_API AWeapon : public AActor
 {
@@ -99,15 +113,32 @@ public:
 	UPROPERTY(EditAnywhere, Category = Config = DrawDebug)
 		bool bDrawDebug = false;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnEquipped(const FString& SkinType);
+
+	UFUNCTION(Server, Reliable)
+		void Server_ChangeSkin(const FString& Skin);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_ChangeSKin(const FString& Skin);
+
+	UFUNCTION()
+	void Test(AEdgeCharacter* OwnerCHar);
+
+		UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveTEST();
+
+	FString GetCurrentSkinWeaponType();
+
+	UPROPERTY(BlueprintReadWrite)
+		FString CurrentSkinType;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnWeaponStateSet();
 	virtual void OnEquipped();
 	virtual void OnDropped();
 	virtual void OnEquippedSecondary();
-
-	UFUNCTION(BlueprintImplementableEvent)
-		void ReceiveOnEquipped();
 
 	UFUNCTION()
 		virtual void OnSphereOverlap(
@@ -197,7 +228,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Config)
 		EWeaponType WeaponType;
 
-
+	class UEdgeGameInstance* EdgeGameInstance;
 
 public:
 
@@ -215,5 +246,5 @@ public:
 	FORCEINLINE float GetDamage() const { return Damage; }
 
 	UFUNCTION(BlueprintCallable)
-		EWeaponType GetWeaponTypeBP() {return WeaponType;}
+		EWeaponType GetWeaponTypeBP() { return WeaponType; }
 };

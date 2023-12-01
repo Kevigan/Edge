@@ -382,7 +382,8 @@ private:
 	UPROPERTY(EditAnywhere)
 		class AEdgeGameMode* EdgeGameMode;
 
-	
+	UFUNCTION(Server, Reliable)
+		void Server_ChangeSkin(const FString& Skin);
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
