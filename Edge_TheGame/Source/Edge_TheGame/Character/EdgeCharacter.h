@@ -23,7 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void OnRep_ReplicatedMovement() override;
-	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode,uint8 PreviousCustomMode) override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 	virtual void Destroyed() override;
 
 	/*
@@ -223,12 +223,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<class AActor> MiniMapClass;
 
-	AActor* MiniMapActor = nullptr;
+	UPROPERTY()
+		AActor* MiniMapActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = Config)
 		TSubclassOf<class AActor> PlayerIndicatorClass;
 
-	AActor* PlayerIndicatorActor = nullptr;
+	UPROPERTY()
+		AActor* PlayerIndicatorActor = nullptr;
 
 	UFUNCTION()
 		void ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);

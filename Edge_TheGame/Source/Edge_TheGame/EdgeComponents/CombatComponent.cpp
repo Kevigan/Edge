@@ -444,6 +444,8 @@ void UCombatComponent::FinishSwapAttachWeapons()
 		UpdateCarriedAmmo();
 		PlayEquippedWeaponSound(EquippedWeapon);
 
+		OnClientJoinMidGame();
+
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
 	}
