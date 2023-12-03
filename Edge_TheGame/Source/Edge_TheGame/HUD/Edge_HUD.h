@@ -80,6 +80,7 @@ public:
 	UPROPERTY()
 		class UAnnouncement* Announcement = nullptr;
 
+	void InitAnnouncement();
 	void AddAnnouncement();
 	void AddElimAnnouncement(FString Attacker, FString Victim, class APlayerState* AttackerPS, APlayerState* VictimPS);
 	void AddMiniMap();

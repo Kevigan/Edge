@@ -33,6 +33,17 @@ void AEdge_HUD::AddCharacterOverlay()
 	}
 }
 
+void AEdge_HUD::InitAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && AnnouncementClass)
+	{
+		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
+		Announcement->AddToViewport();
+		Announcement->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void AEdge_HUD::AddAnnouncement()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();

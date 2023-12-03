@@ -306,6 +306,10 @@ void AEdgePlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch,
 	{
 		EdgeHUD->AddAnnouncement();
 	}
+	if (EdgeHUD && EdgeHUD->Announcement == nullptr)
+	{
+		EdgeHUD->InitAnnouncement();
+	}
 }
 
 void AEdgePlayerController::OnPossess(APawn* InPawn)
