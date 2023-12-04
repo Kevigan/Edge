@@ -11,6 +11,7 @@
 #include "particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Edge_TheGame/EdgeComponents/LagCompensationComponent.h"
+#include "Edge_TheGame/Xylofon.h"
 //#include "NiagaraFunctionLibrary.h"
 //#include "NiagaraComponent.h"
 
@@ -80,7 +81,18 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 
 		}
 
-		if(HitSound)
+		if (FireHit.GetActor() && FireHit.GetActor()->IsA<AXylofon>())
+		{
+			EdgeOwnerCharacter = EdgeOwnerCharacter == nullptr ? Cast<AEdgeCharacter>(OwnerPawn) : EdgeOwnerCharacter;
+			AXylofon* Xylofon = Cast<AXylofon>(FireHit.GetActor());
+			if (EdgeOwnerCharacter)
+			{
+				Xylofon->PlaySoundLocal(EdgeOwnerCharacter);
+				Xylofon->Server_PlayXylofonSound(EdgeOwnerCharacter);
+			}
+		}
+
+		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(
 				this,
@@ -105,6 +117,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				GetActorLocation()
 			);
 		}
+
 	}
 }
 
