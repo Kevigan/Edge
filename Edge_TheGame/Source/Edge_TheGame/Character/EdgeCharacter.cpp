@@ -106,13 +106,13 @@ AEdgeCharacter::AEdgeCharacter()
 	hand_r->SetupAttachment(GetMesh(), FName("hand_r"));
 	HitCollisionBoxes.Add(FName("hand_r"), hand_r);
 
-	backpack = CreateDefaultSubobject<UBoxComponent>(TEXT("backpack"));
+	/*backpack = CreateDefaultSubobject<UBoxComponent>(TEXT("backpack"));
 	backpack->SetupAttachment(GetMesh(), FName("backpack"));
 	HitCollisionBoxes.Add(FName("backpack"), backpack);
 
 	blanket = CreateDefaultSubobject<UBoxComponent>(TEXT("blanket"));
 	blanket->SetupAttachment(GetMesh(), FName("backpack"));
-	HitCollisionBoxes.Add(FName("blanket"), blanket);
+	HitCollisionBoxes.Add(FName("blanket"), blanket);*/
 
 	thigh_l = CreateDefaultSubobject<UBoxComponent>(TEXT("thigh_l"));
 	thigh_l->SetupAttachment(GetMesh(), FName("thigh_l"));
