@@ -60,17 +60,23 @@ void ULagCompensationComponent::SaveFramePackage()
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 {
 	Character = Character == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : Character;
-	if (Character)
+	if (Character && Character->HitCollisionBoxes.Num() > 0)
 	{
 		Package.Time = GetWorld()->GetTimeSeconds();
 		Package.Character = Character;
+		//float poop = 0;
 		for (auto& BoxPair : Character->HitCollisionBoxes)
 		{
+			if (BoxPair.Value == nullptr) continue;
 			FBoxInformation BoxInformation;
 			BoxInformation.Location = BoxPair.Value->GetComponentLocation();
 			BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
 			BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
 			Package.HitboxInfo.Add(BoxPair.Key, BoxInformation);
+			//poop += 1;
+			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *BoxPair.Key.ToString()));
+			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %f"), poop));
+
 		}
 	}
 }
