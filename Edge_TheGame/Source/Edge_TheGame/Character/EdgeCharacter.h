@@ -65,7 +65,7 @@ public:
 	*  Hit boxes used for server-side rewind
 	*/
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		class UBoxComponent* head;
 
 	UPROPERTY(EditAnywhere)

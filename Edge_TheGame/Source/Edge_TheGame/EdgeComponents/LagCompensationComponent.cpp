@@ -72,9 +72,13 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 			BoxInformation.Location = BoxPair.Value->GetComponentLocation();
 			BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
 			BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
+			//BoxInformation.BoxExtent = BoxPair.Value->GetUnscaledBoxExtent() / 10.f;
 			Package.HitboxInfo.Add(BoxPair.Key, BoxInformation);
 			//poop += 1;
-			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *BoxPair.Key.ToString()));
+			if (BoxPair.Key == "head")
+			{
+				//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *BoxInformation.BoxExtent.ToString()));
+			}
 			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %f"), poop));
 
 		}
@@ -111,7 +115,6 @@ FFramePackage ULagCompensationComponent::InterpBetweenFrames(const FFramePackage
 FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackage& Package, AEdgeCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation)
 {
 	if (HitCharacter == nullptr) return FServerSideRewindResult();
-
 	FFramePackage CurrentFrame;
 	CacheBoxPositions(HitCharacter, CurrentFrame);
 	MoveBoxes(HitCharacter, Package);
@@ -133,14 +136,18 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 			TraceEnd,
 			ECC_HitBox
 		);
+		//DrawDebugBox(GetWorld(), TraceEnd, FVector(10, 10, 10), FQuat(0, 0, 0, 0), FColor::Red, false, 18.f);
+		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 18.0f, 0, 1.0f);
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("ConfirmHit %s"), *ConfirmHitResult.ToString()));
 		if (ConfirmHitResult.bBlockingHit) // we hit the head return early
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("ConfirmHit")));
 			if (ConfirmHitResult.Component.IsValid())
 			{
 				UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-				if (Box && bDrawDebug)
+				if (Box /*&& bDrawDebug*/)
 				{
-					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetUnscaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 18.f);
 				}
 			}
 
@@ -169,9 +176,9 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 				if (ConfirmHitResult.Component.IsValid())
 				{
 					UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
-					if (Box && bDrawDebug)
+					if (Box /*&& bDrawDebug*/)
 					{
-						//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+						DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 					}
 				}
 				ResetHitBoxes(HitCharacter, CurrentFrame);
@@ -395,8 +402,10 @@ void ULagCompensationComponent::CacheBoxPositions(AEdgeCharacter* HitCharacter, 
 			FBoxInformation BoxInfo;
 			BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();
 			BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();
-			BoxInfo.BoxExtent = HitBoxPair.Value->GetScaledBoxExtent();
+			BoxInfo.BoxExtent = HitBoxPair.Value->GetUnscaledBoxExtent() /*/ 10.f*/;
+			//BoxInfo.BoxExtent = HitBoxPair.Value->GetScaledBoxExtent() ;
 			OutFramePackage.HitboxInfo.Add(HitBoxPair.Key, BoxInfo);
+			DrawDebugBox(GetWorld(), BoxInfo.Location, BoxInfo.BoxExtent, FQuat(BoxInfo.Rotation), FColor::Red, false, 18.f);
 		}
 	}
 }
@@ -411,6 +420,8 @@ void ULagCompensationComponent::MoveBoxes(AEdgeCharacter* HitCharacter, const FF
 			HitBoxPair.Value->SetWorldLocation(Package.HitboxInfo[HitBoxPair.Key].Location);
 			HitBoxPair.Value->SetWorldRotation(Package.HitboxInfo[HitBoxPair.Key].Rotation);
 			HitBoxPair.Value->SetBoxExtent(Package.HitboxInfo[HitBoxPair.Key].BoxExtent);
+			DrawDebugBox(GetWorld(), Package.HitboxInfo[HitBoxPair.Key].Location, Package.HitboxInfo[HitBoxPair.Key].BoxExtent, FQuat(Package.HitboxInfo[HitBoxPair.Key].Rotation), 
+			FColor::Blue, false, 18.f);
 		}
 	}
 }
@@ -425,6 +436,7 @@ void ULagCompensationComponent::ResetHitBoxes(AEdgeCharacter* HitCharacter, cons
 			HitBoxPair.Value->SetWorldLocation(Package.HitboxInfo[HitBoxPair.Key].Location);
 			HitBoxPair.Value->SetWorldRotation(Package.HitboxInfo[HitBoxPair.Key].Rotation);
 			HitBoxPair.Value->SetBoxExtent(Package.HitboxInfo[HitBoxPair.Key].BoxExtent);
+			//HitBoxPair.Value->SetBox
 			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
@@ -449,7 +461,7 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 			FQuat(BoxInfo.Value.Rotation),
 			Color,
 			false,
-			4.f
+			1.f
 		);
 	}
 }
