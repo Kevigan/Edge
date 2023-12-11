@@ -60,20 +60,24 @@ void ULagCompensationComponent::SaveFramePackage()
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 {
 	Character = Character == nullptr ? Cast<AEdgeCharacter>(GetOwner()) : Character;
-	if (Character && Character->HitCollisionBoxes.Num() > 0)
+	if (Character && Character->HitCollisionBoxess.Num() > 0)
 	{
 		Package.Time = GetWorld()->GetTimeSeconds();
 		Package.Character = Character;
-		//float poop = 0;
-		for (auto& BoxPair : Character->HitCollisionBoxes)
+		float poop = 0;
+		for (auto& BoxPair : Character->HitCollisionBoxess)
 		{
-			if (BoxPair.Value == nullptr) continue;
+			if (BoxPair.Value == nullptr)
+			{
+				//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("shit")));
+				continue;
+			}
 			FBoxInformation BoxInformation;
 			BoxInformation.Location = BoxPair.Value->GetComponentLocation();
 			BoxInformation.Rotation = BoxPair.Value->GetComponentRotation();
 			BoxInformation.BoxExtent = BoxPair.Value->GetScaledBoxExtent();
 			Package.HitboxInfo.Add(BoxPair.Key, BoxInformation);
-			//poop += 1;
+			poop += 1;
 			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *BoxPair.Key.ToString()));
 			//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %f"), poop));
 
@@ -118,7 +122,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
 
 	// Enable collision for head first
-	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxess[FName("head")];
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 
@@ -135,12 +139,13 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		);
 		if (ConfirmHitResult.bBlockingHit) // we hit the head return early
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *ConfirmHitResult.ToString()));
 			if (ConfirmHitResult.Component.IsValid())
 			{
 				UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
 				if (Box && bDrawDebug)
 				{
-					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
+					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
 				}
 			}
 
@@ -150,7 +155,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		}
 		else//didn´t hit the head, checking rest of boxes
 		{
-			for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+			for (auto& HitBoxPair : HitCharacter->HitCollisionBoxess)
 			{
 				if (HitBoxPair.Value != nullptr)
 				{
@@ -171,7 +176,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 					UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component);
 					if (Box && bDrawDebug)
 					{
-						//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+						DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 					}
 				}
 				ResetHitBoxes(HitCharacter, CurrentFrame);
@@ -193,7 +198,7 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
 
 	// Enable collision for head first
-	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
+	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxess[FName("head")];
 	//if(HeadBox == nullptr) return FServerSideRewindResult{ false, false };
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
@@ -207,21 +212,22 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	PathParams.ProjectileRadius = 5.f;
 	PathParams.TraceChannel = ECC_HitBox;
 	PathParams.ActorsToIgnore.Add(GetOwner());
-	//PathParams.DrawDebugTime = 5.f;
-	//PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	PathParams.DrawDebugTime = 5.f;
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
 
 	FPredictProjectilePathResult PathResult;
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
-
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!1")));
 	if (PathResult.HitResult.bBlockingHit) // hit the head, return early
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!2")));
 		if (PathResult.HitResult.Component.IsValid())
 		{
 			UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
 			if (Box && bDrawDebug)
 			{
 				DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Red, false, 8.f);
-				GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!1")));
+				//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!1")));
 			}
 		}
 
@@ -231,8 +237,9 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	}
 	else // no head hit, check other boxes
 	{
-		for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+		for (auto& HitBoxPair : HitCharacter->HitCollisionBoxess)
 		{
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!3")));
 			if (HitBoxPair.Value != nullptr)
 			{
 				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -244,10 +251,12 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 		{
 			if (PathResult.HitResult.Component.IsValid())
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("T!3")));
+				GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("laaaa: %s"), *PathResult.HitResult.ToString()));
 				UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component);
 				if (Box && bDrawDebug)
 				{
-					//DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
+					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), FColor::Blue, false, 8.f);
 				}
 			}
 			ResetHitBoxes(HitCharacter, CurrentFrame);
@@ -283,7 +292,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 	for (auto& Frame : FramePackages)
 	{
 		// Enable collision for head first
-		UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxes[FName("head")];
+		UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxess[FName("head")];
 		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 	}
@@ -328,7 +337,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 	//enable collision for all boxes, then disable for head box
 	for (auto& Frame : FramePackages)
 	{
-		for (auto& HitBoxPair : Frame.Character->HitCollisionBoxes)
+		for (auto& HitBoxPair : Frame.Character->HitCollisionBoxess)
 		{
 			if (HitBoxPair.Value != nullptr)
 			{
@@ -336,7 +345,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 				HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 			}
 		}
-		UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxes[FName("head")];
+		UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxess[FName("head")];
 		HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
@@ -388,7 +397,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 void ULagCompensationComponent::CacheBoxPositions(AEdgeCharacter* HitCharacter, FFramePackage& OutFramePackage)
 {
 	if (HitCharacter == nullptr) return;
-	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxess)
 	{
 		if (HitBoxPair.Value != nullptr)
 		{
@@ -404,7 +413,7 @@ void ULagCompensationComponent::CacheBoxPositions(AEdgeCharacter* HitCharacter, 
 void ULagCompensationComponent::MoveBoxes(AEdgeCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if (HitCharacter == nullptr) return;
-	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxess)
 	{
 		if (HitBoxPair.Value != nullptr)
 		{
@@ -418,7 +427,7 @@ void ULagCompensationComponent::MoveBoxes(AEdgeCharacter* HitCharacter, const FF
 void ULagCompensationComponent::ResetHitBoxes(AEdgeCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if (HitCharacter == nullptr) return;
-	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for (auto& HitBoxPair : HitCharacter->HitCollisionBoxess)
 	{
 		if (HitBoxPair.Value != nullptr)
 		{

@@ -96,7 +96,7 @@ public:
 	UFUNCTION(Server, Reliable)
 		void ShotgunServerScoreRequest(const TArray<AEdgeCharacter*>& HitCharacters,
 			const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
-
+	UPROPERTY(EditAnywhere, Category = Config)
 		bool bDrawDebug = false;
 protected:
 	virtual void BeginPlay() override;

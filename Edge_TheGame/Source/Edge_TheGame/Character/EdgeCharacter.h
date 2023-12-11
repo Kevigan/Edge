@@ -120,7 +120,7 @@ public:
 		UBoxComponent* foot_r;
 
 	UPROPERTY()
-		TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+		TMap<FName, class UBoxComponent*> HitCollisionBoxess;
 
 	bool bFinishSwapping = false;
 	bool bJustFired = false;
