@@ -261,6 +261,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void ReceiveOnStealthMode();
 
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+		void Server_SpawnWeapon(AWeapon* OverlappedWeapon);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SpawnWeapon(AWeapon* OverlappedWeapon);
+
 private:
 	class AEdge_HUD* HUD;
 

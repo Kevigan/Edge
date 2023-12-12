@@ -38,6 +38,9 @@ AWeapon::AWeapon()
 	PickupWidget->SetupAttachment(RootComponent);
 }
 
+
+
+
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -111,6 +114,22 @@ FString AWeapon::GetCurrentSkinWeaponType()
 		}
 	}
 	return FString();
+}
+
+void AWeapon::Client_SpawnWeapon_Implementation()
+{
+	Server_SpawnWeapon();
+}
+
+void AWeapon::Server_SpawnWeapon_Implementation()
+{
+	Multicast_SpawnWeapon();
+}
+
+
+void AWeapon::Multicast_SpawnWeapon_Implementation()
+{
+	ReceiveOnSpawnWeapon();
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -199,7 +218,8 @@ void AWeapon::OnRep_Owner()
 		if (EdgeOwnerCharacter && EdgeOwnerCharacter->GetEquippedWeapon() && EdgeOwnerCharacter->GetEquippedWeapon() == this)
 		{
 			SetHUDAmmo();
-
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString(TEXT("asdqwe")));
+			//ReceiveOnSpawnWeapon();
 		}
 	}
 }
@@ -265,6 +285,7 @@ void AWeapon::OnEquipped()
 			EdgeOwnerController->HighPingDelegate.AddDynamic(this, &ThisClass::OnPingTooHigh);
 		}
 	}
+
 	//ReceiveOnEquipped();
 }
 

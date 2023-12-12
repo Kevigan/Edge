@@ -732,6 +732,17 @@ void AEdgeCharacter::ServerMouseWheelTurned_Implementation()
 	}
 }
 
+void AEdgeCharacter::Server_SpawnWeapon_Implementation(AWeapon* OverlappedWeapon)
+{
+	Multicast_SpawnWeapon(OverlappedWeapon);
+}
+
+
+void AEdgeCharacter::Multicast_SpawnWeapon_Implementation(AWeapon* OverlappedWeapon)
+{
+	OverlappedWeapon->ReceiveOnSpawnWeapon();
+}
+
 void AEdgeCharacter::EquipButtonPressed()
 {
 	if (bDisableGameplay || Combat == nullptr || Combat->CombatState != ECombatState::ECS_Unoccupied || bJustFired || bFireButtonPressed) return;
@@ -752,6 +763,7 @@ void AEdgeCharacter::EquipButtonPressed()
 		if (OverlappingWeapon)
 		{
 			//OverlappingWeapon->Test(this);
+			Server_SpawnWeapon(OverlappingWeapon);
 			Server_ChangeSkin(OverlappingWeapon->GetCurrentSkinWeaponType());
 		}
 		bJustFired = true;

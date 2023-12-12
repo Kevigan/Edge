@@ -133,6 +133,18 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		FString CurrentSkinType;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ReceiveOnSpawnWeapon();
+
+	UFUNCTION(BlueprintCallable, Client, Reliable)
+		void Client_SpawnWeapon();
+
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+		void Server_SpawnWeapon();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SpawnWeapon();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnWeaponStateSet();
@@ -186,6 +198,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Weapon Properties")
 		USkeletalMeshComponent* WeaponMesh = nullptr;
+
+
 
 private:
 
