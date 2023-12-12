@@ -159,6 +159,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void ReceiveOnElimmed();
 
+	UPROPERTY(BlueprintReadWrite, Replicated)
+		bool bJustSpawned = false;
+
 protected:
 	virtual void BeginPlay() override;
 

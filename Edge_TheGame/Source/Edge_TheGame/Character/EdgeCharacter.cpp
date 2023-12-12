@@ -156,6 +156,7 @@ void AEdgeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME_CONDITION(AEdgeCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(AEdgeCharacter, Health);
+	DOREPLIFETIME(AEdgeCharacter, bJustSpawned);
 	DOREPLIFETIME(AEdgeCharacter, bDisableGameplay);
 }
 
@@ -318,7 +319,7 @@ void AEdgeCharacter::CoyoteJumpFinished()
 void AEdgeCharacter::ReceiveDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	EdgeGameMode = EdgeGameMode == nullptr ? GetWorld()->GetAuthGameMode<AEdgeGameMode>() : EdgeGameMode;
-	if (bElimmed || EdgeGameMode == nullptr) return;
+	if (bElimmed || EdgeGameMode == nullptr || bJustSpawned) return;
 	Damage = EdgeGameMode->CalculateDamage(InstigatorController, Controller, Damage);
 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
