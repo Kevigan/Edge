@@ -204,13 +204,13 @@ void AEdgeCharacter::SetTeamColor(ETeam Team)
 	switch (Team)
 	{
 	case ETeam::ET_NoTeam:
-		GetMesh()->SetMaterial(0, NoTeamMat);
+		GetMesh()->SetMaterial(1, NoTeamMat);
 		break;
 	case ETeam::ET_BlueTeam:
-		GetMesh()->SetMaterial(0, BlueTeamMat);
+		//GetMesh()->SetMaterial(1, BlueTeamMat);
 		break;
 	case ETeam::ET_RedTeam:
-		GetMesh()->SetMaterial(0, RedTeamMat);
+		GetMesh()->SetMaterial(1, RedTeamMat);
 		break;
 	}
 }
